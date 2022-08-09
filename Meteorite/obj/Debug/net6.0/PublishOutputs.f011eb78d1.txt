@@ -1,9 +1,0 @@
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\Meteorite.dll
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\Meteorite.deps.json
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\Meteorite.pdb
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\GlmSharp.dll
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\Raylib-cs.dll
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\runtimes\linux-x64\native\libraylib.so
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\runtimes\osx-x64\native\libraylib.dylib
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\runtimes\win-x64\native\raylib.dll
-C:\Users\0824m\projects\csharp\Meteorite\Meteorite\bin\Debug\net6.0\publish\runtimes\win-x86\native\raylib.dll
