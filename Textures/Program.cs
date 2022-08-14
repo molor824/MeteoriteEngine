@@ -2,15 +2,18 @@
 
 public class TexturedSprites : Transform2D
 {
-    Sprite _sprite = new();
-    Sprite _sprite1 = new();
+    Sprite _sprite = null!;
+    Sprite _sprite1 = null!;
 
     float _rotationSpeed = 45;
     float _rotationSpeed1 = -30;
 
     public override void Added()
     {
-        LocalScale = new(2, 1);
+        Scale = new(2, 1);
+
+        _sprite = new();
+        _sprite1 = new();
 
         _sprite.Parent = this;
         _sprite1.Parent = this;
@@ -32,10 +35,8 @@ public class TexturedSprites : Transform2D
     }
     public override void Update(float delta)
     {
-        _sprite.LocalRotation += _rotationSpeed * delta;
-        _sprite1.LocalRotation += _rotationSpeed1 * delta;
-
-        if (Raylib_cs.Raylib.IsKeyPressed(Raylib_cs.KeyboardKey.KEY_E)) _sprite.Enabled = !_sprite.Enabled;
+        _sprite.Rotation += _rotationSpeed * delta;
+        _sprite1.Rotation += _rotationSpeed1 * delta;
 
         base.Update(delta);
     }
@@ -44,9 +45,9 @@ static class Program
 {
     static void Main()
     {
-        var game = new Game();
+        var game = new Game("Textures", 800, 600);
 
         game.AddObject(new TexturedSprites());
-        game.Run("Textures", 800, 600);
+        game.Run();
     }
 }

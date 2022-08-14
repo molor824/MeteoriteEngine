@@ -31,10 +31,10 @@ static class Program
 {
     static void Main()
     {
-        var game = new Game();
+        var game = new Game("Hello World!", 800, 600);
 
         game.AddObject(new Print());
 
-        game.Run("Hello World!", 800, 600);
+        game.Run();
     }
 }

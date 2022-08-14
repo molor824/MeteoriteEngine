@@ -12,6 +12,7 @@ public class Texture
     {
         Raylib.UnloadTexture(Raw);
     }
+    internal Texture() { }
     public Texture(int width, int height, Color[] pixels)
     {
         unsafe

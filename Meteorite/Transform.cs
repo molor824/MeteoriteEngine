@@ -4,45 +4,45 @@ using System.Collections.ObjectModel;
 
 public class Transform : GameObject
 {
-    public vec3 LocalPosition;
-    public vec3 LocalScale = new(1);
-    public quat LocalRotation = quat.Identity;
-    public mat4 Matrix
+    public vec3 Position;
+    public vec3 Scale = new(1);
+    public quat Rotation = quat.Identity;
+    public mat4 GlobalTransformMatrix
     {
         get
         {
-            var matrix = LocalMatrix;
+            var matrix = TransformMatrix;
             var parent = Parent as Transform;
 
             while (parent != null)
             {
                 // this way you get translation from the parent to child
-                matrix = parent.LocalMatrix * matrix;
+                matrix = parent.TransformMatrix * matrix;
                 parent = parent.Parent as Transform;
             }
 
             return matrix;
         }
     }
-    public mat4 LocalMatrix =>
-        mat4.Translate(LocalPosition) *
-        glm.ToMat4(LocalRotation) *
-        mat4.Scale(LocalScale)
+    public mat4 TransformMatrix =>
+        mat4.Translate(Position) *
+        glm.ToMat4(Rotation) *
+        mat4.Scale(Scale)
     ;
-    public vec3 Position
+    public vec3 GlobalPosition
     {
         get
         {
-            var position = LocalPosition;
+            var position = Position;
             var parent = Parent as Transform;
 
             while (parent != null)
             {
                 // position is affected by both rotation and scale
                 // it seem to make sense by scaling the position and then rotating it
-                position *= parent.LocalScale;
-                position = LocalRotation * position;
-                position += parent.LocalPosition;
+                position *= parent.Scale;
+                position = Rotation * position;
+                position += parent.Position;
                 parent = parent.Parent as Transform;
             }
 
@@ -56,21 +56,21 @@ public class Transform : GameObject
             while (parent != null)
             {
                 // same order but in reverse
-                position -= parent.LocalPosition;
+                position -= parent.Position;
                 // changing multipication order should reverse it
-                position = position * LocalRotation;
-                position /= parent.LocalScale;
+                position = position * Rotation;
+                position /= parent.Scale;
                 parent = parent.Parent as Transform;
             }
 
-            LocalPosition = position;
+            Position = position;
         }
     }
     public vec3 LossyScale
     {
         get
         {
-            var scale = LocalScale;
+            var scale = Scale;
             var parent = Parent as Transform;
 
             while (parent != null)
@@ -78,7 +78,7 @@ public class Transform : GameObject
                 // scale is just multiplied by its parent scale
                 // i dont i can make scale change according to its rotation
                 // if i add rotation on the effect, it becomes shearing, not scaling
-                scale *= parent.LocalScale;
+                scale *= parent.Scale;
                 parent = parent.Parent as Transform;
             }
 
@@ -92,24 +92,24 @@ public class Transform : GameObject
             while (parent != null)
             {
                 // reverse
-                scale /= parent.LocalScale;
+                scale /= parent.Scale;
                 parent = parent.Parent as Transform;
             }
 
-            LocalScale = scale;
+            Scale = scale;
         }
     }
-    public quat Rotation
+    public quat GlobalRotation
     {
         get
         {
-            var rotation = LocalRotation;
+            var rotation = Rotation;
             var parent = Parent as Transform;
 
             while (parent != null)
             {
                 // rotate the rotation by its parent's rotation
-                rotation = parent.LocalRotation * rotation;
+                rotation = parent.Rotation * rotation;
                 parent = parent.Parent as Transform;
             }
 
@@ -123,11 +123,11 @@ public class Transform : GameObject
             while (parent != null)
             {
                 // reverse
-                rotation = rotation * parent.LocalRotation;
+                rotation = rotation * parent.Rotation;
                 parent = parent.Parent as Transform;
             }
 
-            LocalRotation = rotation;
+            Rotation = rotation;
         }
     }
 }

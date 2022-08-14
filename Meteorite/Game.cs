@@ -10,12 +10,27 @@ public class Game : IEnumerable
     public int FixedFPS = 60;
     public int ObjectCount => _objects.Count;
 
-    public Camera3D MainCamera = new();
+    public Camera MainCamera = new(CameraProjection.Orthographic, 10)
+    {
+        Position = new(0, 0, 10),
+    };
 
     List<GameObject> _objects = new(0x100);
     List<GameObjectState> _objectStates = new();
-    bool _shouldClose;
+    bool _shouldClose = false;
 
+    public Game(string title, int width, int height)
+    {
+        Raylib.SetConfigFlags(ConfigFlags.FLAG_VSYNC_HINT);
+        Raylib.InitWindow(width, height, title);
+        Raylib.SetTargetFPS(FixedFPS);
+
+        Raylib.SetExitKey((KeyboardKey)(-1));
+
+        Log.Print("Initialized window");
+
+        _objects.Add(MainCamera);
+    }
     public void AddObject(GameObject obj)
     {
         _objectStates.Add(new()
@@ -140,36 +155,27 @@ public class Game : IEnumerable
         {
             if (obj.Enabled)
             {
-                obj.Close();
                 obj.Removed();
+                obj.Close();
             }
         }
     }
-    public void Run(string name, int width, int height)
+    public void Run()
     {
-        Raylib.SetConfigFlags(ConfigFlags.FLAG_VSYNC_HINT);
-        Raylib.InitWindow(width, height, name);
-        Raylib.SetTargetFPS(FixedFPS);
-
-        MainCamera.projection = CameraProjection.CAMERA_ORTHOGRAPHIC;
-        MainCamera.fovy = 10;
-        MainCamera.position = new(0, 0, 10);
-        MainCamera.target = new(0, 0, -1);
-        MainCamera.up = new(0, 1, 0);
-
         Start();
 
-        var updateThread = new Thread(FixedUpdate);
-
-        updateThread.Start();
+        var update = new Thread(FixedUpdate);
+        update.Start();
 
         while (!Raylib.WindowShouldClose())
         {
             var delta = Raylib.GetFrameTime();
 
+            MainCamera.CameraUpdate();
+
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Raylib_cs.Color.BLACK);
-            Raylib.BeginMode3D(MainCamera);
+            Raylib.BeginMode3D(MainCamera.Raw);
 
             Render(delta);
 
@@ -178,7 +184,8 @@ public class Game : IEnumerable
         }
 
         _shouldClose = true;
-        updateThread.Join();
+
+        update.Join();
 
         Close();
 
@@ -212,6 +219,41 @@ public class Game : IEnumerable
         {
             yield return obj;
         }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public object ZZZ__DO_NOT_TOUCH_THIS_PROPERTY_PLZ__
+    {
+        get => throw new Exception("Told ya not to touch it, stupid");
+        set => throw new Exception(
+            "Here' your prize for breaking the game engine: https://youtu.be/hiRacdl02w4"
+        );
     }
 }
 enum State

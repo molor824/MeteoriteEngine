@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures", "Textures\Textur
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{121D5B19-F17A-432A-A561-F51FE6D2C750}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelLoading", "ModelLoading\ModelLoading.csproj", "{F63F07A7-2ABC-4877-ADBD-B2CA81A49F46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{AECED56A-AD0A-4162-B5CB-062D9EE5DF5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AECED56A-AD0A-4162-B5CB-062D9EE5DF5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AECED56A-AD0A-4162-B5CB-062D9EE5DF5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F63F07A7-2ABC-4877-ADBD-B2CA81A49F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F63F07A7-2ABC-4877-ADBD-B2CA81A49F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F63F07A7-2ABC-4877-ADBD-B2CA81A49F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F63F07A7-2ABC-4877-ADBD-B2CA81A49F46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

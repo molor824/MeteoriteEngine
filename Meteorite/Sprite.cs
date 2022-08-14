@@ -57,6 +57,7 @@ public class Sprite : Transform2D
                     new(0, 1)
                 }
             );
+            Log.Print("Loaded sprite mesh");
         }
         if (_default == null)
         {
@@ -64,8 +65,13 @@ public class Sprite : Transform2D
             {
                 PixelsPerUnit = 1
             };
+            Log.Print("Loaded sprite default texture");
         }
-        if (_texture == null) { _texture = _default; }
+        if (_texture == null)
+        {
+            Log.Print("Texture is null, using default texture");
+            _texture = _default;
+        }
 
         _material = new(_texture, _color);
 
@@ -73,13 +79,11 @@ public class Sprite : Transform2D
     }
     public override void Render(float delta)
     {
-        var oldScale = LocalScale;
+        var oldScale = Scale;
 
-        LocalScale *= Texture.Size / Texture.PixelsPerUnit;
-        var matrix = Matrix;
-        LocalScale = oldScale;
-
-        Raylib.DrawMesh(_quad.Raw, _material.Raw, matrix.Transposed.ToSystem());
+        Scale *= Texture.Size / Texture.PixelsPerUnit;
+        Raylib.DrawMesh(_quad.Raw, _material.Raw, GlobalTransformMatrix.Transposed.ToSystem());
+        Scale = oldScale;
 
         base.Render(delta);
     }

@@ -6,14 +6,14 @@ public static class Log
     {
 #if DEBUG
         Console.ResetColor();
-        Console.WriteLine(fmt, objs);
+        Console.WriteLine("LOG: " + fmt, objs);
 #endif
     }
     public static void Warn(string fmt, params object?[] objs)
     {
 #if DEBUG
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(fmt, objs);
+        Console.WriteLine("LOG WARN: " + fmt, objs);
         Console.ResetColor();
 #endif
     }
@@ -21,15 +21,15 @@ public static class Log
     {
 #if DEBUG
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(fmt, objs);
+        Console.WriteLine("LOG ERROR: " + fmt, objs);
         Console.ResetColor();
 #endif
     }
-    public static void PrintColored(string fmt, ConsoleColor color, params object?[] objs)
+    public static void PrintColored(ConsoleColor color, string fmt, params object?[] objs)
     {
 #if DEBUG
         Console.ForegroundColor = color;
-        Console.WriteLine(fmt, objs);
+        Console.WriteLine("LOG: " + fmt, objs);
         Console.ResetColor();
 #endif
     }
