@@ -1,52 +1,26 @@
-namespace Meteorite;
+﻿namespace Meteorite;
 
-using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 public class Texture
 {
-    public vec2 Size => new(Raw.width, Raw.height);
-    public float PixelsPerUnit;
-    internal Raylib_cs.Texture2D Raw;
+	Image<Rgba32> _image;
 
-    public void Unload()
-    {
-        Raylib.UnloadTexture(Raw);
-    }
-    internal Texture() { }
-    public Texture(int width, int height, Color[] pixels)
-    {
-        unsafe
-        {
-            fixed (void* ptr = pixels)
-            {
-                TextureInit(width, height, ptr, 1, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R32G32B32A32);
-            }
-        }
-    }
-    public Texture(int width, int height, BColor[] pixels)
-    {
-        unsafe
-        {
-            fixed (void* ptr = pixels)
-            {
-                TextureInit(width, height, ptr, 1, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-            }
-        }
-    }
-    public Texture(string path)
-    {
-        Raw = Raylib.LoadTexture(path);
-    }
-    unsafe void TextureInit(int width, int height, void* data, int mipmaps, PixelFormat format)
-    {
-        var image = new Raylib_cs.Image()
-        {
-            width = width,
-            height = height,
-            data = data,
-            mipmaps = mipmaps,
-            format = format,
-        };
-        Raw = Raylib.LoadTextureFromImage(image);
-    }
+	public Texture(string path)
+	{
+		_image = Image.Load<Rgba32>(path);
+		_image.Mutate(x => x.Flip(FlipMode.Vertical));
+
+		var pixels = new byte[_image.Width * _image.Height];
+		_image.CopyPixelDataTo(pixels);
+
+		GL.TexParameter(
+			TextureTarget.Texture2D,
+			TextureParameterName.TextureMinFilter,
+			(int)TextureMinFilter.Nearest
+		);
+	}
 }

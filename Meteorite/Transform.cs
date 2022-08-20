@@ -2,7 +2,7 @@ namespace Meteorite;
 
 using System.Collections.ObjectModel;
 
-public class Transform : GameObject
+public class Transform : Node
 {
     public vec3 Position;
     public vec3 Scale = new(1);

@@ -2,21 +2,21 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>0.0.0.1</Version>
-		<Authors>Molor</Authors>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="GlmSharp" Version="0.9.8" />
 		<PackageReference Include="OpenTK" Version="4.7.4" />
-		<PackageReference Include="Raylib-cs" Version="4.0.0.1" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
-		<Using Include="Raylib_cs" />
 		<Using Include="GlmSharp" />
-		<Using Include="MeteoriteRenderer" />
+
+		<Content Include="shaders/**">
+			<Link>%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>

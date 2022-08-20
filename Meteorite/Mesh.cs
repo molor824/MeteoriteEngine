@@ -1,67 +1,170 @@
-namespace Meteorite;
+﻿namespace Meteorite;
 
-using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL;
 
-public class Mesh : IDisposable
+public class Mesh : Transform, IDisposable
 {
-    internal const int MaxMeshVertexBuffers = 7;
-    internal Raylib_cs.Mesh Raw;
+	public Shader? Shader;
 
-    void IDisposable.Dispose()
-    {
-        Unload();
-    }
-    public void Unload()
-    {
-        unsafe
-        {
-            Raylib.UnloadMesh(ref Raw);
-        }
-    }
-    public Mesh(IEnumerable<vec3> vertices, IEnumerable<ushort> indices)
-    {
-        MeshInit(vertices, indices, new vec2[vertices.Count()], null, false);
-    }
-    public Mesh(IEnumerable<vec3> vertices, IEnumerable<ushort> indices, IEnumerable<vec2> texcoords)
-    {
-        MeshInit(vertices, indices, texcoords, null, false);
-    }
-    public Mesh(IEnumerable<vec3> vertices, IEnumerable<ushort> indices, IEnumerable<BColor> colors)
-    {
-        MeshInit(vertices, indices, new vec2[vertices.Count()], colors, false);
-    }
-    public Mesh(IEnumerable<vec3> vertices, IEnumerable<ushort> indices, IEnumerable<vec2> texcoords, IEnumerable<BColor> colors)
-    {
-        MeshInit(vertices, indices, texcoords, colors, false);
-    }
-    internal Mesh(Raylib_cs.Mesh raw)
-    {
-        Raw = raw;
-    }
-    void MeshInit(IEnumerable<vec3> vertices, IEnumerable<ushort> indices, IEnumerable<vec2> texcoords, IEnumerable<BColor>? colors, bool dynamic)
-    {
-        if (vertices.Count() != texcoords.Count() || colors != null && vertices.Count() != colors.Count())
-        {
-            Log.Panic(
-                "Vertices, Texcoords and Colors length does not match.\n" +
-                "Vertices: {0}\n" +
-                "TexCoords: {1}\n" +
-                "Colors: {2}",
-                vertices.Count(), texcoords.Count(), colors?.Count()
-            );
-        }
+	internal static Shader DefaultShader;
+	ushort[] _indices;
+	Vertex[] _vertices;
+	Color[]? _colors;
+	int _vao, _vertexBuffer, _colorBuffer, _ebo;
 
-        unsafe
-        {
-            Raw.vertexCount = vertices.Count();
-            Raw.triangleCount = indices.Count() / 3;
+	static Mesh()
+	{
+		var currentDir = Path.GetDirectoryName(
+			System.Reflection.Assembly.GetExecutingAssembly().Location
+		);
+		Log.Print("Current executable directory: {0}", currentDir);
 
-            Raw.vertices = (float*)FastAlloc.AllocWith(vertices);
-            Raw.indices = FastAlloc.AllocWith(indices);
-            Raw.texcoords = (float*)FastAlloc.AllocWith(texcoords);
-            if (colors != null) Raw.colors = (byte*)FastAlloc.AllocWith(colors);
+		DefaultShader = Shader.FromPath(currentDir + "/vertex.vs", currentDir + "/fragment.fs");
+	}
+	public Mesh(Vertex[] vertices, ushort[] indices)
+	{
+		_vertices = vertices;
+		_indices = indices;
+	}
+	public Mesh(Vertex[] vertices, ushort[] indices, Color[]? vertexColors)
+	{
+		_vertices = vertices;
+		_indices = indices;
+		_colors = vertexColors;
+	}
+	public Mesh(Vertex[] vertices, ushort[] indices, Color[]? vertexColors, Shader shader)
+	{
+		_vertices = vertices;
+		_indices = indices;
+		_colors = vertexColors;
+		Shader = shader;
+	}
 
-            Raylib.UploadMesh(ref Raw, dynamic);
-        }
-    }
+	internal static void DefaultShaderRender(Mesh mesh)
+	{
+
+	}
+	public void Render()
+	{
+		if (Shader != null)
+		{
+			GL.UseProgram(Shader.Program);
+		}
+		else Log.Error("Shader is null!");
+
+		GL.BindVertexArray(_vao);
+		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, 0);
+	}
+	public void Upload()
+	{
+		if (_vao != 0)
+		{
+			Log.Error("Already uploaded!");
+			return;
+		}
+		if (Shader != null)
+		{
+			if (Shader.Program == 0) Shader.CreateProgram();
+		}
+		else
+		{
+			Shader = DefaultShader;
+		}
+
+		// Note to self: Always bind vertex array first
+		_vao = GL.GenVertexArray();
+		GL.BindVertexArray(_vao);
+
+		Log.Print("Generated vao {0}", _vao);
+
+		unsafe
+		{
+			_ebo = GL.GenBuffer();
+
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+			GL.BufferData(
+				BufferTarget.ElementArrayBuffer,
+				sizeof(ushort) * _indices.Length,
+				_indices,
+				BufferUsageHint.StaticDraw
+			);
+
+			_vertexBuffer = GL.GenBuffer();
+
+			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+			GL.BufferData(
+				BufferTarget.ArrayBuffer,
+				sizeof(Vertex) * _vertices.Length,
+				_vertices,
+				BufferUsageHint.StaticDraw
+			);
+
+			GL.VertexAttribPointer(
+				0, 3, VertexAttribPointerType.Float, false, sizeof(Vertex), 0
+			);
+			GL.EnableVertexAttribArray(0);
+
+			GL.VertexAttribPointer(
+				1, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), sizeof(vec3)
+			);
+			GL.EnableVertexAttribArray(1);
+
+			if (_colors != null)
+			{
+				if (_colors.Length == _vertices.Length)
+				{
+					_colorBuffer = GL.GenBuffer();
+
+					GL.BindBuffer(BufferTarget.ArrayBuffer, _colorBuffer);
+					GL.BufferData(
+						BufferTarget.ArrayBuffer,
+						sizeof(vec3) * _colors.Length,
+						_colors,
+						BufferUsageHint.StaticDraw
+					);
+
+					GL.VertexAttribPointer(
+						2, 4, VertexAttribPointerType.Float, false, 0, 0
+					);
+					GL.EnableVertexAttribArray(2);
+				}
+				else
+				{
+					Log.Error(
+						$"Vertex colors length is not matching with vertices length ({_colors.Length} != {_vertices.Length}), didn't set color buffer"
+					);
+				}
+			}
+		}
+	}
+	void IDisposable.Dispose()
+	{
+		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+		GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+		GL.BindVertexArray(0);
+
+		if (_colors != null) GL.DeleteBuffer(_colorBuffer);
+		GL.DeleteBuffer(_vertexBuffer);
+		GL.DeleteBuffer(_ebo);
+		GL.DeleteBuffer(_vao);
+
+		Log.Print("Disposed vao: {0}", _vao);
+	}
 }
+public struct Vertex
+{
+	public vec3 Position;
+	public vec2 TexCoord;
+
+	public Vertex(vec3 position)
+	{
+		Position = position;
+		TexCoord = new();
+	}
+	public Vertex(vec3 position, vec2 texcoord)
+	{
+		Position = position;
+		TexCoord = texcoord;
+	}
+}
+
