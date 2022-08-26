@@ -14,12 +14,12 @@ public class TexturedSprites : Transform2D
 
         _sprite = new();
         _sprite1 = new();
+        
+        AddChildren(_sprite, _sprite1);
 
-        _sprite.Parent = this;
-        _sprite1.Parent = this;
-
-        _sprite.Texture = new("Textures/Contents/raylib.png");
-        _sprite1.Texture = new("Textures/Contents/opengl.png");
+        // assuming inside bin/Debug/net6.0
+        _sprite.Texture = new("../../../Contents/raylib.png");
+        _sprite1.Texture = new("../../../Contents/opengl.png");
 
         // by default, camera's height is 10 units
         _sprite.Texture.PixelsPerUnit = 100;
@@ -28,8 +28,6 @@ public class TexturedSprites : Transform2D
         // layer is z index in 3D rendering
         _sprite.Layer = -1;
         _sprite1.Layer = 0;
-
-        Game.AddObjects(_sprite, _sprite1);
 
         base.Added();
     }
@@ -47,7 +45,7 @@ static class Program
     {
         var game = new Game("Textures", 800, 600);
 
-        game.AddObject(new TexturedSprites());
+        game.AddNode(new TexturedSprites());
         game.Run();
     }
 }

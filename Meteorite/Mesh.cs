@@ -2,25 +2,15 @@
 
 using OpenTK.Graphics.OpenGL;
 
-public class Mesh : Transform, IDisposable
+public class Mesh : IDisposable
 {
-	public Shader? Shader;
+    public Shader Shader = new();
 
-	internal static Shader DefaultShader;
 	ushort[] _indices;
 	Vertex[] _vertices;
 	Color[]? _colors;
 	int _vao, _vertexBuffer, _colorBuffer, _ebo;
 
-	static Mesh()
-	{
-		var currentDir = Path.GetDirectoryName(
-			System.Reflection.Assembly.GetExecutingAssembly().Location
-		);
-		Log.Print("Current executable directory: {0}", currentDir);
-
-		DefaultShader = Shader.FromPath(currentDir + "/vertex.vs", currentDir + "/fragment.fs");
-	}
 	public Mesh(Vertex[] vertices, ushort[] indices)
 	{
 		_vertices = vertices;
@@ -31,26 +21,11 @@ public class Mesh : Transform, IDisposable
 		_vertices = vertices;
 		_indices = indices;
 		_colors = vertexColors;
-	}
-	public Mesh(Vertex[] vertices, ushort[] indices, Color[]? vertexColors, Shader shader)
-	{
-		_vertices = vertices;
-		_indices = indices;
-		_colors = vertexColors;
-		Shader = shader;
-	}
+    }
 
-	internal static void DefaultShaderRender(Mesh mesh)
-	{
-
-	}
-	public void Render()
-	{
-		if (Shader != null)
-		{
-			GL.UseProgram(Shader.Program);
-		}
-		else Log.Error("Shader is null!");
+    public void Render()
+    {
+        GL.UseProgram(Shader.Program);
 
 		GL.BindVertexArray(_vao);
 		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, 0);
@@ -62,14 +37,7 @@ public class Mesh : Transform, IDisposable
 			Log.Error("Already uploaded!");
 			return;
 		}
-		if (Shader != null)
-		{
-			if (Shader.Program == 0) Shader.CreateProgram();
-		}
-		else
-		{
-			Shader = DefaultShader;
-		}
+        Shader.CreateProgram();
 
 		// Note to self: Always bind vertex array first
 		_vao = GL.GenVertexArray();

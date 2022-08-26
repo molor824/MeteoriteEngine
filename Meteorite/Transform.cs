@@ -12,13 +12,13 @@ public class Transform : Node
         get
         {
             var matrix = TransformMatrix;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // this way you get translation from the parent to child
-                matrix = parent.TransformMatrix * matrix;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p) matrix = p.TransformMatrix * matrix;
+                parent = parent.Parent;
             }
 
             return matrix;
@@ -34,16 +34,20 @@ public class Transform : Node
         get
         {
             var position = Position;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // position is affected by both rotation and scale
                 // it seem to make sense by scaling the position and then rotating it
-                position *= parent.Scale;
-                position = Rotation * position;
-                position += parent.Position;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p)
+                {
+                    position *= p.Scale;
+                    position = Rotation * position;
+                    position += p.Position;
+                }
+
+                parent = parent.Parent;
             }
 
             return position;
@@ -51,16 +55,20 @@ public class Transform : Node
         set
         {
             var position = value;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
-                // same order but in reverse
-                position -= parent.Position;
-                // changing multipication order should reverse it
-                position = position * Rotation;
-                position /= parent.Scale;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p)
+                {
+                    // same order but in reverse
+                    position -= p.Position;
+                    // changing multipication order should reverse it
+                    position = position * Rotation;
+                    position /= p.Scale;
+                }
+
+                parent = parent.Parent;
             }
 
             Position = position;
@@ -71,15 +79,15 @@ public class Transform : Node
         get
         {
             var scale = Scale;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // scale is just multiplied by its parent scale
                 // i dont i can make scale change according to its rotation
                 // if i add rotation on the effect, it becomes shearing, not scaling
-                scale *= parent.Scale;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p) scale *= p.Scale;
+                parent = parent.Parent;
             }
 
             return scale;
@@ -87,13 +95,13 @@ public class Transform : Node
         set
         {
             var scale = value;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // reverse
-                scale /= parent.Scale;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p) scale /= p.Scale;
+                parent = parent.Parent;
             }
 
             Scale = scale;
@@ -104,13 +112,13 @@ public class Transform : Node
         get
         {
             var rotation = Rotation;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // rotate the rotation by its parent's rotation
-                rotation = parent.Rotation * rotation;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p) rotation = p.Rotation * rotation;
+                parent = parent.Parent;
             }
 
             return rotation;
@@ -118,13 +126,13 @@ public class Transform : Node
         set
         {
             var rotation = value;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
                 // reverse
-                rotation = rotation * parent.Rotation;
-                parent = parent.Parent as Transform;
+                if (parent is Transform p) rotation = rotation * p.Rotation;
+                parent = parent.Parent;
             }
 
             Rotation = rotation;

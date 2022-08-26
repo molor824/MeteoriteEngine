@@ -4,11 +4,47 @@ using OpenTK.Graphics.OpenGL;
 
 public class Shader
 {
-	string _vertexShader = "", _fragmentShader = "";
+    string _vertexShader =
+@"#version 330 core
 
-	public int Program;
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+layout (location = 2) in vec3 aColor;
 
-	public void CreateProgram()
+out vec4 fColor;
+out vec2 fTexCoord;
+
+uniform mat4 transform
+
+void main()
+{
+    gl_Position = transform * vec4(aPos, 1);
+    fTexCoord = aTexCoord;
+    fColor = vec4(aColor, 1);
+}";
+    string _fragmentShader =
+@"#version 330 core
+
+out vec4 FragColor;
+
+in vec2 fTexCoord;
+in vec4 fColor;
+
+uniform sampler2D texture0;
+uniform vec4 textureColor;
+
+void main()
+{
+    FragColor = texture(texture0, fTexCoord) * fColor * textureColor;
+}";
+
+    internal int Program;
+
+    internal void UseProgram()
+    {
+        GL.UseProgram(Program);
+    }
+    internal void CreateProgram()
 	{
 		if (Program != 0)
 		{
@@ -58,7 +94,7 @@ public class Shader
 	{
 		return new(File.ReadAllText(vsPath), File.ReadAllText(fsPath));
 	}
-	Shader() { }
+    public Shader() { }
 	public Shader(string vertexShader, string fragmentShader)
 	{
 		_vertexShader = vertexShader;

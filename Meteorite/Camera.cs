@@ -2,31 +2,19 @@ namespace Meteorite;
 
 public class Camera : Transform
 {
-    internal Raylib_cs.Camera3D Raw = new() { up = new(0, 1, 0) };
+    public CameraProjection Projection = CameraProjection.Orthographic;
+    public float Fovy = 10;
+    public float Near = 0.01f, Far = 1000;
+    public mat4 WorldToCamera => (
+        Projection == CameraProjection.Perspective ?
+        mat4.PerspectiveFov(Fovy, Game.Main.Width, Game.Main.Height, Near, Far) :
+        mat4.Ortho(Game.Main.Width / -2, Game.Main.Width / 2, Game.Main.Height / -2, Game.Main.Height / 2)
+    ) * GlobalTransformMatrix.Inverse;
 
     public Camera() { }
-    public Camera(CameraProjection projection, float fovy)
-    {
-        Raw.projection = (Raylib_cs.CameraProjection)projection;
-        Raw.fovy = fovy;
-    }
-    public vec3 LookDirection = new(0, 0, -1);
-    public CameraProjection Projection
-    {
-        get => (CameraProjection)Raw.projection;
-        set { Raw.projection = (Raylib_cs.CameraProjection)value; }
-    }
-    public float FovY
-    {
-        get => Raw.fovy;
-        set { Raw.fovy = value; }
-    }
-
-    internal void CameraUpdate()
-    {
-        Raw.position = GlobalPosition.ToSystem();
-        Raw.target = (GlobalRotation * LookDirection).ToSystem() + Raw.position;
-    }
+    public Camera(CameraProjection projection, float fovy) { }
+    public static Camera FromPerspective(float fovy) => new(CameraProjection.Perspective, fovy);
+    public static Camera FromOrthographic(float height) => new(CameraProjection.Orthographic, height);
 }
 public enum CameraProjection
 {

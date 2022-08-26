@@ -1,223 +1,195 @@
 namespace Meteorite;
 
+using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
 using System.Threading;
-using System.Collections;
-using System.Collections.ObjectModel;
 
-public class Game : IEnumerable
+public class Game
 {
-    public int FixedFPS = 60;
-    public int ObjectCount => _objects.Count;
+    public static Game Main => _main;
+    public float FixedUpdateDelta = 1f / 60;
+    public Camera? MainCamera;
+    public int Width => _width;
+    public int Height => _height;
 
-    public Camera MainCamera = new(CameraProjection.Orthographic, 10)
+    bool WindowShouldClose
     {
-        Position = new(0, 0, 10),
-    };
-
-    List<GameObject> _objects = new(0x100);
-    List<GameObjectState> _objectStates = new();
-    bool _shouldClose = false;
-
-    public Game(string title, int width, int height)
-    {
-        Raylib.SetConfigFlags(ConfigFlags.FLAG_VSYNC_HINT);
-        Raylib.InitWindow(width, height, title);
-        Raylib.SetTargetFPS(FixedFPS);
-
-        Raylib.SetExitKey((KeyboardKey)(-1));
-
-        Log.Print("Initialized window");
-
-        _objects.Add(MainCamera);
+        get { unsafe { return GLFW.WindowShouldClose((Window*)_window); } }
+        set { unsafe { GLFW.SetWindowShouldClose((Window*)_window, value); } }
     }
-    public void AddObject(GameObject obj)
+
+    private static List<ISingleton> _singletons = new();
+    bool _shouldClose;
+    IntPtr _window;
+    int _width, _height;
+    static Game _main = null!;
+    internal unsafe Window* RawWindow => (Window*)_window;
+
+    unsafe void Resize(Window* window, int width, int height)
     {
-        _objectStates.Add(new()
+        GL.Viewport(0, 0, width, height);
+        _width = width;
+        _height = height;
+
+        Log.Print("Resized with {0}x{1} resolution", width, height);
+    }
+
+    /// <summary>
+    /// Quickly adds node as child to the main root node.
+    /// Shorthand for <c>Node.MainRoot.AddChild(node)</c>.
+    /// </summary>
+    /// <param name="node">Node to add</param>
+    /// <returns>Itself for method chaining</returns>
+    public Game AddNode(Node node)
+    {
+        Node.MainRoot.AddChild(node);
+        return this;
+    }
+    /// <summary>
+    /// Quickly adds multiple nodes as children to the main root node.
+    /// Shorthand for <c>Node.MainRoot.AddChildren(nodes)</c>.
+    /// </summary>
+    /// <param name="nodes">Nodes to add</param>
+    /// <returns>Itself for method chaining</returns>
+    public Game AddNodes(params Node[] nodes)
+    {
+        Node.MainRoot.AddChildren(nodes);
+        return this;
+    }
+    public static void AddSingleton(ISingleton singleton) => _singletons.Add(singleton);
+    public static void AddSingleton<T>() where T : ISingleton, new() => _singletons.Add(new T());
+    public static bool RemoveSingleton(ISingleton singleton) => _singletons.Remove(singleton);
+    public static bool RemoveSingleton(int index)
+    {
+        if (index < 0 || index >= _singletons.Count) return false;
+        _singletons.RemoveAt(index);
+        return true;
+    }
+
+    public static T? GetSingleton<T>() where T : class, ISingleton
+    {
+        foreach (var singleton in _singletons)
+            if (singleton is T t) return t;
+
+        return null;
+    }
+    public Game(string title, int width = 800, int height = 600)
+    {
+        if (_main != null) throw Log.Panic("Cannot create more than 1 instance of Game!");
+
+        GLFW.Init();
+        GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3);
+        GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3);
+        GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core);
+
+        unsafe
         {
-            Value = obj,
-            State = State.Added,
-        });
-    }
-    public void AddObjects(params GameObject[] objs)
-    {
-        foreach (var obj in objs) { AddObject(obj); }
-    }
-    public void RemoveObject(GameObject obj)
-    {
-        _objectStates.Add(new()
-        {
-            Value = obj,
-            State = State.Removed
-        });
-    }
-    public void RemoveObjects(params GameObject[] objs)
-    {
-        foreach (var obj in objs) { RemoveObject(obj); }
-    }
-    public void RemoveObjects(Type type)
-    {
-        foreach (var obj in _objects)
-        {
-            if (obj.GetType() == type) { RemoveObject(obj); }
-        }
-    }
-    public void RemoveObjects<T>() where T : GameObject
-    {
-        RemoveObjects(typeof(T));
-    }
-    public bool ContainsObject(GameObject obj)
-    {
-        foreach (var obj1 in _objects)
-        {
-            if (obj1 == obj) { return true; }
-        }
-        return false;
-    }
-    public bool ContainsType(Type type)
-    {
-        foreach (var obj in _objects)
-        {
-            if (obj.GetType() == type) { return true; }
-        }
-        return false;
-    }
-    public bool ContainsType<T>() where T : GameObject
-    {
-        return ContainsType(typeof(T));
-    }
-    public GameObject[] GetObjects(Type type)
-    {
-        var list = new List<GameObject>(_objects.Count);
+            var window = GLFW.CreateWindow(width, height, title, null, null);
 
-        foreach (var obj in _objects)
-        {
-            if (obj.GetType() == type) { list.Add(obj); }
-        }
-
-        return list.ToArray();
-    }
-    public ReadOnlyCollection<T>? GetObjects<T>() where T : GameObject
-    {
-        return GetObjects(typeof(T)) as ReadOnlyCollection<T>;
-    }
-
-    void AddSetup(GameObject obj)
-    {
-        obj.Game = this;
-        obj.Added();
-    }
-    void RemoveSetup(GameObject obj)
-    {
-        obj.Removed();
-        obj.Game = null!;
-    }
-    void SyncObjects()
-    {
-        for (var i = 0; i < _objectStates.Count; i++)
-        {
-            var objState = _objectStates[i];
-            var obj = objState.Value;
-
-            if (objState.State == State.Added)
+            if (window == null)
             {
-                _objects.Add(obj);
-                AddSetup(obj);
+                GLFW.Terminate();
+                throw Log.Panic("Failed to create window!");
             }
-            else
-            {
-                RemoveSetup(obj);
-                _objects.Remove(obj);
-            }
+
+
+            GLFW.MakeContextCurrent(window);
+            GLFW.SetFramebufferSizeCallback(window, Resize);
+            GLFW.SwapInterval(1);
+
+            GL.LoadBindings(new GLFWBindingsContext());
+            GL.Enable(EnableCap.DepthTest);
+            GL.VertexAttrib3(2, 1f, 1f, 1f);
+            Resize(null, width, height);
+
+            _window = (IntPtr)window;
         }
 
-        _objectStates.Clear();
+        Log.Print("Opengl Version: " + GL.GetString(StringName.Version));
+        Log.Print("GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
+        Log.Print("Renderer: " + GL.GetString(StringName.Renderer));
+
+        _main = this;
     }
-    void Start()
+    public void SetWindowSize(int width, int height)
     {
-        SyncObjects();
-        foreach (var obj in this) { if (obj.Enabled) { obj.Start(); } }
+        unsafe { GLFW.SetWindowSize(RawWindow, width, height); }
+        _width = width;
+        _height = height;
     }
-    void Update(float delta)
+    void SwapBuffers()
     {
-        SyncObjects();
-        foreach (var obj in this) { if (obj.Enabled) { obj.Update(delta); } }
+        unsafe { GLFW.SwapBuffers(RawWindow); }
     }
-    void Render(float delta)
+    void Start(Node root)
     {
-        SyncObjects();
-        foreach (var obj in this) { if (obj.Enabled) { obj.Render(delta); } }
+        root.Start();
+        for (var i = 0; i < root.ChildrenCount; i++) Start(root.GetChild(i));
     }
-    void Close()
+    void Update(Node root, float delta)
     {
-        SyncObjects();
-        foreach (var obj in this)
-        {
-            if (obj.Enabled)
-            {
-                obj.Removed();
-                obj.Close();
-            }
-        }
+        root.Update(delta);
+        for (var i = 0; i < root.ChildrenCount; i++) Update(root.GetChild(i), delta);
+    }
+    void Render(Node root, float delta)
+    {
+        root.Render(delta);
+        for (var i = 0; i < root.ChildrenCount; i++) Render(root.GetChild(i), delta);
+    }
+
+    void Close(Node root)
+    {
+        root.Close();
+        for (var i = 0; i < root.ChildrenCount; i++) Close(root.GetChild(i));
     }
     public void Run()
     {
-        Start();
+        Start(Node.MainRoot);
+        foreach (var singleton in _singletons) singleton.Start();
 
-        var update = new Thread(FixedUpdate);
-        update.Start();
+        var updateThread = new Thread(UpdateLoop);
+        var stopwatch = Stopwatch.StartNew();
+        updateThread.Start();
 
-        while (!Raylib.WindowShouldClose())
+        while (!WindowShouldClose)
         {
-            var delta = Raylib.GetFrameTime();
-
-            MainCamera.CameraUpdate();
-
-            Raylib.BeginDrawing();
-            Raylib.ClearBackground(Raylib_cs.Color.BLACK);
-            Raylib.BeginMode3D(MainCamera.Raw);
-
-            Render(delta);
-
-            Raylib.EndMode3D();
-            Raylib.EndDrawing();
-        }
-
-        _shouldClose = true;
-
-        update.Join();
-
-        Close();
-
-        Raylib.CloseWindow();
-    }
-    void FixedUpdate()
-    {
-        var stopwatch = new Stopwatch();
-
-        stopwatch.Start();
-
-        while (!_shouldClose)
-        {
-            var delta = 1.0 / FixedFPS;
-
-            Update((float)delta);
-
-            while (stopwatch.Elapsed.TotalSeconds < delta) { }
+            var elapsed = (float)stopwatch.Elapsed.TotalSeconds;
 
             stopwatch.Restart();
-        }
-    }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
+            Render(Node.MainRoot, elapsed);
+            foreach (var singleton in _singletons) singleton.Render(elapsed);
+
+            GLFW.PollEvents();
+            SwapBuffers();
+        }
+
+        Close(Node.MainRoot);
+        foreach (var singleton in _singletons) singleton.Close();
+        
+        _shouldClose = true;
+        GLFW.Terminate();
+        
+        updateThread.Join();
+        
+        Log.Print("Window closed succesfully!");
     }
-    public IEnumerator<GameObject> GetEnumerator()
+    void UpdateLoop()
     {
-        foreach (var obj in _objects)
+        var stopwatch = Stopwatch.StartNew();
+        var lastElapsed = stopwatch.ElapsedTicks;
+        
+        while (!_shouldClose)
         {
-            yield return obj;
+            var deltaTick = (long)(FixedUpdateDelta * Stopwatch.Frequency);
+            
+            if (stopwatch.ElapsedTicks - lastElapsed < deltaTick) continue;
+
+            lastElapsed += deltaTick;
+
+            Update(Node.MainRoot, FixedUpdateDelta);
+            foreach (var singleton in _singletons) singleton.Update(FixedUpdateDelta);
         }
     }
 
@@ -263,6 +235,6 @@ enum State
 }
 struct GameObjectState
 {
-    public GameObject Value;
+    public Node Value;
     public State State;
 }

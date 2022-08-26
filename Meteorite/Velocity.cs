@@ -1,6 +1,6 @@
 namespace Meteorite;
 
-public class Velocity : Transform
+public class LocalVelocity : Transform
 {
     public vec3 Linear;
     public quat Angular;

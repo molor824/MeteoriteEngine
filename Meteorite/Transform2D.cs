@@ -15,10 +15,10 @@ public class Transform2D : Transform
     }
     public new float Rotation
     {
-        get => (float)base.Rotation.EulerAngles.z * Raylib.RAD2DEG;
-        set { base.Rotation = quat.FromAxisAngle(value * Raylib.DEG2RAD, new(0, 0, 1)); }
+        get => (float)base.Rotation.EulerAngles.z * MathConst.Rad2Deg;
+        set { base.Rotation = quat.FromAxisAngle(value * MathConst.Deg2Rad, new(0, 0, 1)); }
     }
-    public float Layer
+    public float LocalLayer
     {
         get => base.Position.z;
         set { base.Position.z = value; }
@@ -35,32 +35,32 @@ public class Transform2D : Transform
     }
     public new float GlobalRotation
     {
-        get => (float)base.Rotation.EulerAngles.z * Raylib.RAD2DEG;
-        set { base.Rotation = quat.FromAxisAngle(value * Raylib.DEG2RAD, new(0, 0, 1)); }
+        get => (float)base.Rotation.EulerAngles.z * MathConst.Rad2Deg;
+        set { base.Rotation = quat.FromAxisAngle(value * MathConst.Deg2Rad, new(0, 0, 1)); }
     }
-    public float GlobalLayer
+    public float Layer
     {
         get
         {
             var layer = base.Position.z;
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
-                layer += parent.Position.z;
-                parent = parent.Parent as Transform;
+                if (parent is Transform2D p) layer += p.LocalLayer;
+                parent = parent.Parent;
             }
 
             return layer;
         }
         set
         {
-            var parent = Parent as Transform;
+            var parent = Parent;
 
             while (parent != null)
             {
-                value -= parent.Position.z;
-                parent = parent.Parent as Transform;
+                if (parent is Transform2D p) value -= p.LocalLayer;
+                parent = parent.Parent;
             }
 
             base.Position.z = value;

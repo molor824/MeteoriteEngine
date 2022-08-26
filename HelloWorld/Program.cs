@@ -1,6 +1,6 @@
 ﻿using Meteorite;
 
-public class Print : GameObject
+public class Print : Node
 {
     public override void Added()
     {
@@ -33,8 +33,7 @@ static class Program
     {
         var game = new Game("Hello World!", 800, 600);
 
-        game.AddObject(new Print());
-
+        game.AddNode(new Print());
         game.Run();
     }
 }

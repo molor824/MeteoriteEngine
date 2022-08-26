@@ -31,8 +31,8 @@ public static class Log
 		Console.ResetColor();
 #endif
 	}
-	public static void Panic(string fmt, params object?[] objs)
+	public static Exception Panic(string fmt, params object?[] objs)
 	{
-		throw new Exception("\x1b[31m\n" + string.Format(fmt, objs) + "\x1b[0m");
+		return new Exception("PANIC: " + string.Format(fmt, objs));
 	}
 }
