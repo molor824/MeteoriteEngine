@@ -13,10 +13,10 @@ public class Mesh : IDisposable
     }
     public void Unload()
     {
-        unsafe
-        {
-            Raylib.UnloadMesh(ref Raw);
-        }
+        if (Raw.vaoId == 0) return;
+
+        Raylib.UnloadMesh(ref Raw);
+        Raw.vaoId = 0;
     }
     public Mesh(IEnumerable<vec3> vertices, IEnumerable<ushort> indices)
     {

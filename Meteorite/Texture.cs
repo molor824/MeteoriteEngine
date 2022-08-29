@@ -2,15 +2,22 @@ namespace Meteorite;
 
 using System.Runtime.InteropServices;
 
-public class Texture
+public class Texture : IDisposable
 {
     public vec2 Size => new(Raw.width, Raw.height);
     public float PixelsPerUnit;
     internal Raylib_cs.Texture2D Raw;
 
+    void IDisposable.Dispose()
+    {
+        Unload();
+    }
     public void Unload()
     {
+        if (Raw.id == 0) return;
+
         Raylib.UnloadTexture(Raw);
+        Raw.id = 0;
     }
     internal Texture() { }
     public Texture(int width, int height, Color[] pixels)

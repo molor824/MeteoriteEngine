@@ -87,4 +87,11 @@ public class Sprite : Transform2D
 
         base.Render(delta);
     }
+    public override void Close()
+    {
+        base.Close();
+
+        _texture.Unload();
+        _quad.Unload();
+    }
 }

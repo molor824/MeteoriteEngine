@@ -1,6 +1,6 @@
 namespace Meteorite;
 
-public class Shader
+public class Shader : IDisposable
 {
     internal Raylib_cs.Shader Raw;
 
@@ -31,5 +31,9 @@ public class Shader
     public void Unload()
     {
         Raylib.UnloadShader(Raw);
+    }
+    void IDisposable.Dispose()
+    {
+        Unload();
     }
 }
