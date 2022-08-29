@@ -45,12 +45,12 @@ public class Sprite : Transform2D
                 //     new(0, 1)
                 // }
             );
-            Log.Print("Loaded sprite mesh");
+            _quad.Upload();
         }
         if (_default == null)
         {
             _default = new(new Color[] { Color.White }, 1, 1);
-            Log.Print("Loaded sprite default texture");
+            _default.Upload();
         }
         if (Texture == null)
         {

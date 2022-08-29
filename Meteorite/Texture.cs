@@ -1,10 +1,13 @@
-﻿namespace Meteorite;
+﻿using System.Reflection;
+
+namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Runtime.CompilerServices;
+using System;
 
 public class Texture
 {
@@ -15,15 +18,17 @@ public class Texture
     int _handle;
 
     public Texture(string path)
-	{
-		_image = Image.Load<Rgba32>(path);
+    {
+        var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        
+		_image = Image.Load<Rgba32>(Path.Join(asmPath, path));
 		_image.Mutate(x => x.Flip(FlipMode.Vertical));
     }
     public Texture(Color[] pixels, int width, int height)
     {
         _image = Image.LoadPixelData<Rgba32>(Unsafe.As<Rgba32[]>(pixels), width, height);
     }
-    void Upload(
+    public void Upload(
         TextureMinFilter minFilter = TextureMinFilter.NearestMipmapLinear,
         TextureMagFilter magFilter = TextureMagFilter.Linear,
         TextureWrapMode wrapS = TextureWrapMode.Repeat,
@@ -71,6 +76,8 @@ public class Texture
         );
 
         _handle = GL.GenTexture();
+        
+        Log.Print("[ID: {0}] Succesfully loaded texture!", _handle);
     }
     internal void Bind(TextureUnit unit = TextureUnit.Texture0)
     {

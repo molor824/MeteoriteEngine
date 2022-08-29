@@ -28,7 +28,7 @@ public class Mesh : IDisposable
         GL.UseProgram(Shader.Program);
 
 		GL.BindVertexArray(_vao);
-		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, 0);
+		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, _ebo);
 	}
 	public void Upload()
 	{
@@ -104,6 +104,8 @@ public class Mesh : IDisposable
 				}
 			}
 		}
+		
+		Log.Print("[ID: {0}] Loaded mesh succesfully!", _vao);
 	}
 	void IDisposable.Dispose()
 	{
@@ -115,8 +117,6 @@ public class Mesh : IDisposable
 		GL.DeleteBuffer(_vertexBuffer);
 		GL.DeleteBuffer(_ebo);
 		GL.DeleteBuffer(_vao);
-
-		Log.Print("Disposed vao: {0}", _vao);
 	}
 }
 public struct Vertex

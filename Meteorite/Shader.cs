@@ -14,14 +14,15 @@ layout (location = 2) in vec3 aColor;
 out vec4 fColor;
 out vec2 fTexCoord;
 
-uniform mat4 transform
+uniform mat4 transform;
 
 void main()
 {
     gl_Position = transform * vec4(aPos, 1);
     fTexCoord = aTexCoord;
     fColor = vec4(aColor, 1);
-}";
+}
+";
     string _fragmentShader =
 @"#version 330 core
 
@@ -36,7 +37,8 @@ uniform vec4 textureColor;
 void main()
 {
     FragColor = texture(texture0, fTexCoord) * fColor * textureColor;
-}";
+}
+";
 
     internal int Program;
 
