@@ -25,7 +25,6 @@ internal static class FastAlloc
     }
     internal static unsafe void Free(IntPtr ptr)
     {
-        Log.Print("Freeing unmanaged pointer: {0}", ptr);
         NativeMemory.Free((void*)ptr);
     }
 }

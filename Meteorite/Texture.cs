@@ -1,59 +1,87 @@
+﻿using System.Reflection;
+
 namespace Meteorite;
 
-using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System.Runtime.CompilerServices;
+using System;
 
-public class Texture : IDisposable
+public class Texture
 {
-    public vec2 Size => new(Raw.width, Raw.height);
-    public float PixelsPerUnit;
-    internal Raylib_cs.Texture2D Raw;
+    public vec2 Size => new(_image.Width, _image.Height);
+    public float PixelsPerUnit = 1;
 
-    void IDisposable.Dispose()
-    {
-        Unload();
-    }
-    public void Unload()
-    {
-        if (Raw.id == 0) return;
+    Image<Rgba32> _image;
+    int _handle;
 
-        Raylib.UnloadTexture(Raw);
-        Raw.id = 0;
-    }
-    internal Texture() { }
-    public Texture(int width, int height, Color[] pixels)
-    {
-        unsafe
-        {
-            fixed (void* ptr = pixels)
-            {
-                TextureInit(width, height, ptr, 1, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R32G32B32A32);
-            }
-        }
-    }
-    public Texture(int width, int height, BColor[] pixels)
-    {
-        unsafe
-        {
-            fixed (void* ptr = pixels)
-            {
-                TextureInit(width, height, ptr, 1, PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-            }
-        }
-    }
     public Texture(string path)
     {
-        Raw = Raylib.LoadTexture(path);
+        var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        
+		_image = Image.Load<Rgba32>(Path.Join(asmPath, path));
+		_image.Mutate(x => x.Flip(FlipMode.Vertical));
     }
-    unsafe void TextureInit(int width, int height, void* data, int mipmaps, PixelFormat format)
+    public Texture(Color[] pixels, int width, int height)
     {
-        var image = new Raylib_cs.Image()
+        _image = Image.LoadPixelData<Rgba32>(Unsafe.As<Rgba32[]>(pixels), width, height);
+    }
+    public void Upload(
+        TextureMinFilter minFilter = TextureMinFilter.NearestMipmapLinear,
+        TextureMagFilter magFilter = TextureMagFilter.Linear,
+        TextureWrapMode wrapS = TextureWrapMode.Repeat,
+        TextureWrapMode wrapT = TextureWrapMode.Repeat,
+        Color? borderColor = null
+    )
+    {
+        var pixels = new Rgba32[_image.Width * _image.Height];
+		_image.CopyPixelDataTo(pixels);
+
+		GL.TexParameter(
+			TextureTarget.Texture2D,
+			TextureParameterName.TextureMinFilter,
+            (int)minFilter
+        );
+        GL.TexParameter(
+            TextureTarget.Texture2D,
+            TextureParameterName.TextureMagFilter,
+            (int)magFilter
+        );
+        GL.TexParameter(
+            TextureTarget.Texture2D,
+            TextureParameterName.TextureWrapS,
+            (int)wrapS
+        );
+        GL.TexParameter(
+            TextureTarget.Texture2D,
+            TextureParameterName.TextureWrapT,
+            (int)wrapT
+        );
+
+        if (borderColor is Color col)
         {
-            width = width,
-            height = height,
-            data = data,
-            mipmaps = mipmaps,
-            format = format,
-        };
-        Raw = Raylib.LoadTextureFromImage(image);
+            GL.TexParameter(
+                TextureTarget.Texture2D,
+                TextureParameterName.TextureBorderColor,
+                new float[] { col.R, col.G, col.B, col.A }
+            );
+        }
+
+        GL.TexImage2D(
+            TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+            _image.Width, _image.Height, 0,
+            PixelFormat.Rgba, PixelType.Float, pixels
+        );
+
+        _handle = GL.GenTexture();
+        
+        Log.Print("[ID: {0}] Succesfully loaded texture!", _handle);
+    }
+    internal void Bind(TextureUnit unit = TextureUnit.Texture0)
+    {
+        GL.ActiveTexture(unit);
+        GL.BindTexture(TextureTarget.Texture2D, _handle);
     }
 }
