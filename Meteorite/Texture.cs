@@ -19,74 +19,99 @@ public class Texture
     int _handle;
     int _width, _height;
 
-    public Texture(string path)
+    public Texture(string path, TextureParameters? tParams = null)
     {
-        var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var image = Image.Load<RgbaVector>(Path.Join(asmPath, path));
+        var image = Image.Load<RgbaVector>(ResourceLoader.LoadFile(path));
 
-        Upload(image);
+        Upload(image, tParams ?? new());
     }
-    public Texture(Color[] pixels, int width, int height)
+    public Texture(IEnumerable<Color> pixels, int width, int height, TextureParameters? tParams = null)
     {
-        var image = Image.LoadPixelData<RgbaVector>(Unsafe.As<RgbaVector[]>(pixels), width, height);
+        var image = Image.LoadPixelData(pixels.Select(
+            p => new RgbaVector(
+                p.R,
+                p.G,
+                p.B,
+                p.A
+            )
+        ).ToArray(), width, height);
 
-        Upload(image);
+        Upload(image, tParams ?? new());
     }
-    public void Upload(
-        Image<RgbaVector> image,
-        TextureMinFilter minFilter = TextureMinFilter.NearestMipmapLinear,
-        TextureMagFilter magFilter = TextureMagFilter.Linear,
-        TextureWrapMode wrapS = TextureWrapMode.Repeat,
-        TextureWrapMode wrapT = TextureWrapMode.Repeat,
-        Color? borderColor = null
-    )
+    void Upload(Image<RgbaVector> image, TextureParameters tParams)
     {
-        var pixels = new RgbaVector[image.Width * image.Height];
+        _width = image.Width;
+        _height = image.Height;
+        
+        var pixels = new RgbaVector[_width * _height];
         image.CopyPixelDataTo(pixels);
+
+        _handle = GL.GenTexture();
+        Bind();
 
 		GL.TexParameter(
 			TextureTarget.Texture2D,
 			TextureParameterName.TextureMinFilter,
-            (int)minFilter
+            (int)tParams.MinFilter
         );
         GL.TexParameter(
             TextureTarget.Texture2D,
             TextureParameterName.TextureMagFilter,
-            (int)magFilter
+            (int)tParams.MagFilter
         );
         GL.TexParameter(
             TextureTarget.Texture2D,
             TextureParameterName.TextureWrapS,
-            (int)wrapS
+            (int)tParams.WrapMode
         );
         GL.TexParameter(
             TextureTarget.Texture2D,
             TextureParameterName.TextureWrapT,
-            (int)wrapT
+            (int)tParams.WrapMode
         );
-
-        if (borderColor is Color col)
-        {
-            GL.TexParameter(
-                TextureTarget.Texture2D,
-                TextureParameterName.TextureBorderColor,
-                new float[] { col.R, col.G, col.B, col.A }
-            );
-        }
+        GL.TexParameter(
+            TextureTarget.Texture2D,
+            TextureParameterName.TextureBorderColor,
+            new[]
+            {
+                tParams.BorderColor.R,
+                tParams.BorderColor.G,
+                tParams.BorderColor.B,
+                tParams.BorderColor.A
+            }
+        );
 
         GL.TexImage2D(
             TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-            image.Width, image.Height, 0,
+            _width, _height, 0,
             PixelFormat.Rgba, PixelType.Float, pixels
         );
+        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-        _handle = GL.GenTexture();
-        
-        Log.Print("[ID: {0}] Succesfully loaded texture!", _handle);
+        Log.Success("[ID: {0}] Texture loaded!", _handle);
     }
-    internal void Bind(TextureUnit unit = TextureUnit.Texture0)
+
+    ~Texture()
     {
-        GL.ActiveTexture(unit);
+        Unload();
+    }
+
+    void Unload()
+    {
+        GL.DeleteTexture(_handle);
+    }
+    internal void Bind()
+    {
         GL.BindTexture(TextureTarget.Texture2D, _handle);
     }
+}
+
+public struct TextureParameters
+{
+    public TextureMinFilter MinFilter = TextureMinFilter.NearestMipmapLinear;
+    public TextureMagFilter MagFilter = TextureMagFilter.Linear;
+    public TextureWrapMode WrapMode = TextureWrapMode.Repeat;
+    public Color BorderColor = Color.Black;
+
+    public TextureParameters() { }
 }

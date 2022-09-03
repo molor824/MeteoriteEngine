@@ -31,9 +31,10 @@ static class Program
 {
     static void Main()
     {
-        var game = new Game("Hello World!", 800, 600);
-
-        game.AddNode(new Print());
-        game.Run();
+        Game.New("Hello Meteorite Engine!");
+        
+        // Equivalent to Node.MainRoot.AddChild(new Print());
+        Game.AddNode(new Print());
+        Game.Run();
     }
 }

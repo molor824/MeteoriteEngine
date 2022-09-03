@@ -1,4 +1,6 @@
-﻿namespace Meteorite;
+﻿using System.Runtime.Versioning;
+
+namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 
@@ -42,17 +44,13 @@ void main()
 
     internal int Program;
 
-    internal void UseProgram()
+    internal int GetUniformLocation(string location)
     {
-        GL.UseProgram(Program);
+	    return GL.GetUniformLocation(Program, location);
     }
-    internal void CreateProgram()
-	{
-		if (Program != 0)
-		{
-			Log.Warn("Program is already defined");
-			return;
-		}
+    void Upload()
+    {
+	    if (Program != 0) return;
 
 		var vs = GL.CreateShader(ShaderType.VertexShader);
 		var fs = GL.CreateShader(ShaderType.FragmentShader);
@@ -63,8 +61,17 @@ void main()
 		GL.CompileShader(vs);
 		GL.CompileShader(fs);
 
-		CheckShaderError(vs);
-		CheckShaderError(fs);
+		if (CheckShaderError(vs) is string verr)
+		{
+			Log.Error("Vertex shader error: {0}", verr);
+			return;
+		}
+
+		if (CheckShaderError(fs) is string ferr)
+		{
+			Log.Error("Fragment shader error: {0}", ferr);
+			return;
+		}
 
 		Program = GL.CreateProgram();
 
@@ -72,34 +79,56 @@ void main()
 		GL.AttachShader(Program, fs);
 
 		GL.LinkProgram(Program);
-		CheckProgramError(Program);
+		
+		GL.DeleteShader(vs);
+		GL.DeleteShader(fs);
+
+		if (CheckProgramError(Program) is string perr)
+		{
+			Program = 0;
+			Log.Error("Program error: {0}", perr);
+			return;
+		}
+		
+		Log.Success("[ID: {0}] Shader program loaded!", Program);
 	}
-	static void CheckShaderError(int shader)
+
+    void Unload()
+    {
+	    GL.DeleteProgram(Program);
+    }
+	static string? CheckShaderError(int shader)
 	{
 		GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
 
-		if (success == 0)
-		{
-			Log.Error("Shader error:\n{0}", GL.GetShaderInfoLog(shader));
-		}
+		if (success == 0) return GL.GetShaderInfoLog(shader);
+		return null;
 	}
-	static void CheckProgramError(int program)
+	static string? CheckProgramError(int program)
 	{
 		GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int success);
 
-		if (success == 0)
-		{
-			Log.Error("Program error:\n{0}", GL.GetProgramInfoLog(program));
-		}
+		if (success == 0) return GL.GetProgramInfoLog(program);
+		return null;
 	}
 	public static Shader FromPath(string vsPath, string fsPath)
 	{
-		return new(File.ReadAllText(vsPath), File.ReadAllText(fsPath));
+		return new(ResourceLoader.LoadTextFile(vsPath), ResourceLoader.LoadTextFile(fsPath));
 	}
-    public Shader() { }
-	public Shader(string vertexShader, string fragmentShader)
+
+	public Shader()
+	{
+		Upload();
+	}
+    public Shader(string vertexShader, string fragmentShader)
 	{
 		_vertexShader = vertexShader;
 		_fragmentShader = fragmentShader;
+		Upload();
 	}
+
+    ~Shader()
+    {
+	    Unload();
+    }
 }

@@ -1,7 +1,5 @@
 namespace Meteorite;
 
-using System.Collections.ObjectModel;
-
 public class Transform : Node
 {
     public vec3 Position;

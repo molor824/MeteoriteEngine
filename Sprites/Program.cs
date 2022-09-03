@@ -5,7 +5,7 @@ static class Program
 {
     static void Main()
     {
-        var game = new Game("Sprites", 800, 600);
+        Game.New("Sprites");
 
         var sprite = new Sprite()
         {
@@ -30,7 +30,7 @@ static class Program
             Rotation = 20,
         };
 
-        game.AddNode(sprite).AddNode(sprite1).AddNode(sprite2);
-        game.Run();
+        Game.AddNodes(sprite, sprite1, sprite2);
+        Game.Run();
     }
 }

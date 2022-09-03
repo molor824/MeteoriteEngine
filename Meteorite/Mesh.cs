@@ -2,7 +2,7 @@
 
 using OpenTK.Graphics.OpenGL;
 
-public class Mesh : IDisposable
+public class Mesh
 {
     public Shader Shader = new();
 
@@ -15,35 +15,35 @@ public class Mesh : IDisposable
 	{
 		_vertices = vertices;
 		_indices = indices;
+		Upload();
 	}
 	public Mesh(Vertex[] vertices, ushort[] indices, Color[]? vertexColors)
 	{
 		_vertices = vertices;
 		_indices = indices;
 		_colors = vertexColors;
+		Upload();
     }
 
-    public void Render()
+    public void Render(mat4 transform)
     {
-        GL.UseProgram(Shader.Program);
+	    GL.UseProgram(Shader.Program);
+	    
+	    unsafe
+	    {
+		    GL.UniformMatrix4(Shader.GetUniformLocation("transform"), 1, false, (float*)&transform);
+	    }
 
 		GL.BindVertexArray(_vao);
 		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, _ebo);
 	}
-	public void Upload()
+	void Upload()
 	{
-		if (_vao != 0)
-		{
-			Log.Error("Already uploaded!");
-			return;
-		}
-        Shader.CreateProgram();
-
+		if (_vao != 0) return;
+		
 		// Note to self: Always bind vertex array first
 		_vao = GL.GenVertexArray();
 		GL.BindVertexArray(_vao);
-
-		Log.Print("Generated vao {0}", _vao);
 
 		unsafe
 		{
@@ -105,9 +105,9 @@ public class Mesh : IDisposable
 			}
 		}
 		
-		Log.Print("[ID: {0}] Loaded mesh succesfully!", _vao);
+		Log.Success("[ID: {0}] Mesh loaded!", _vao);
 	}
-	void IDisposable.Dispose()
+	void Unload()
 	{
 		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
@@ -117,6 +117,11 @@ public class Mesh : IDisposable
 		GL.DeleteBuffer(_vertexBuffer);
 		GL.DeleteBuffer(_ebo);
 		GL.DeleteBuffer(_vao);
+	}
+
+	~Mesh()
+	{
+		Unload();
 	}
 }
 public struct Vertex

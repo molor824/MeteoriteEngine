@@ -5,28 +5,36 @@ using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
 using System.Threading;
 
-public class Game
+public static class Game
 {
-    public static Game Main => _main;
-    public float FixedUpdateDelta = 1f / 60;
-    public Camera? MainCamera;
-    public int Width => _width;
-    public int Height => _height;
-
-    bool WindowShouldClose
+    public static string ResourcesDir
     {
-        get { unsafe { return GLFW.WindowShouldClose((Window*)_window); } }
-        set { unsafe { GLFW.SetWindowShouldClose((Window*)_window, value); } }
+        get => _resourcesDir;
+        set
+        {
+            if (!Directory.Exists(value)) Log.Error("Path `{0}` does not exist!", value);
+
+            _resourcesDir = value;
+        }
+    }
+    public static float FixedUpdateDelta = 1f / 60;
+    public static Camera MainCamera = new();
+    public static int Width => _width;
+    public static int Height => _height;
+    public static bool WindowShouldClose
+    {
+        get { unsafe { return GLFW.WindowShouldClose(RawWindow); } }
+        set { unsafe { GLFW.SetWindowShouldClose(RawWindow, value); } }
     }
 
-    private static List<ISingleton> _singletons = new();
-    bool _shouldClose;
-    IntPtr _window;
-    int _width, _height;
-    static Game _main = null!;
-    internal unsafe Window* RawWindow => (Window*)_window;
+    private static string _resourcesDir = "Resources";
+    static List<ISingleton> _singletons = new();
+    static bool _shouldClose;
+    static IntPtr _window;
+    static int _width, _height;
+    internal static unsafe Window* RawWindow => (Window*)_window;
 
-    unsafe void Resize(Window* window, int width, int height)
+    static unsafe void Resize(Window* window, int width, int height)
     {
         GL.Viewport(0, 0, width, height);
         _width = width;
@@ -41,10 +49,9 @@ public class Game
     /// </summary>
     /// <param name="node">Node to add</param>
     /// <returns>Itself for method chaining</returns>
-    public Game AddNode(Node node)
+    public static void AddNode(Node node)
     {
         Node.MainRoot.AddChild(node);
-        return this;
     }
     /// <summary>
     /// Quickly adds multiple nodes as children to the main root node.
@@ -52,10 +59,9 @@ public class Game
     /// </summary>
     /// <param name="nodes">Nodes to add</param>
     /// <returns>Itself for method chaining</returns>
-    public Game AddNodes(params Node[] nodes)
+    public static void AddNodes(params Node[] nodes)
     {
         Node.MainRoot.AddChildren(nodes);
-        return this;
     }
     public static void AddSingleton(ISingleton singleton) => _singletons.Add(singleton);
     public static void AddSingleton<T>() where T : ISingleton, new() => _singletons.Add(new T());
@@ -74,10 +80,8 @@ public class Game
 
         return null;
     }
-    public Game(string title, int width = 800, int height = 600)
+    public static void New(string title, int width = 800, int height = 600)
     {
-        if (_main != null) throw Log.Panic("Cannot create more than 1 instance of Game!");
-
         GLFW.Init();
         GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3);
         GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3);
@@ -104,46 +108,47 @@ public class Game
             Resize(null, width, height);
 
             _window = (IntPtr)window;
+            
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
         Log.Print("Opengl Version: " + GL.GetString(StringName.Version));
         Log.Print("GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
         Log.Print("Renderer: " + GL.GetString(StringName.Renderer));
-
-        _main = this;
     }
-    public void SetWindowSize(int width, int height)
+    public static void SetWindowSize(int width, int height)
     {
         unsafe { GLFW.SetWindowSize(RawWindow, width, height); }
         _width = width;
         _height = height;
     }
-    void SwapBuffers()
+    static void SwapBuffers()
     {
         unsafe { GLFW.SwapBuffers(RawWindow); }
     }
-    void Start(Node root)
+    static void Start(Node root)
     {
         root.Start();
         for (var i = 0; i < root.ChildrenCount; i++) Start(root.GetChild(i));
     }
-    void Update(Node root, float delta)
+    static void Update(Node root, float delta)
     {
         root.Update(delta);
         for (var i = 0; i < root.ChildrenCount; i++) Update(root.GetChild(i), delta);
     }
-    void Render(Node root, float delta)
+    static void Render(Node root, float delta)
     {
         root.Render(delta);
         for (var i = 0; i < root.ChildrenCount; i++) Render(root.GetChild(i), delta);
     }
-
-    void Close(Node root)
+    static void Close(Node root)
     {
         root.Close();
         for (var i = 0; i < root.ChildrenCount; i++) Close(root.GetChild(i));
     }
-    public void Run()
+    public static void Run()
     {
         Start(Node.MainRoot);
         foreach (var singleton in _singletons) singleton.Start();
@@ -157,6 +162,10 @@ public class Game
             var elapsed = (float)stopwatch.Elapsed.TotalSeconds;
 
             stopwatch.Restart();
+            
+            GL.ClearColor(0, 0, 0, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.DepthBufferBit);
 
             Render(Node.MainRoot, elapsed);
             foreach (var singleton in _singletons) singleton.Render(elapsed);
@@ -173,9 +182,9 @@ public class Game
         
         updateThread.Join();
         
-        Log.Print("Window closed succesfully!");
+        Log.Success("Window closed!");
     }
-    void UpdateLoop()
+    static void UpdateLoop()
     {
         var stopwatch = Stopwatch.StartNew();
         var lastElapsed = stopwatch.ElapsedTicks;
@@ -220,7 +229,7 @@ public class Game
 
 
 
-    public object ZZZ__DO_NOT_TOUCH_THIS_PROPERTY_PLZ__
+    public static object ZZZ__DO_NOT_TOUCH_THIS_PROPERTY_PLZ__
     {
         get => throw new Exception("Told ya not to touch it, stupid");
         set => throw new Exception(

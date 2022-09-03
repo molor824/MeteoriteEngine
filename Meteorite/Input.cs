@@ -13,7 +13,7 @@ public class Input : ISingleton
     {
         unsafe
         {
-            GLFW.SetCursorPosCallback(Game.Main.RawWindow, (window, x, y) =>
+            GLFW.SetCursorPosCallback(Game.RawWindow, (window, x, y) =>
             {
                 var position = new vec2((float)x, (float)y);
 
@@ -25,7 +25,7 @@ public class Input : ISingleton
 
                 _lastMousePos = position;
             });
-            GLFW.SetKeyCallback(Game.Main.RawWindow, (window, key, code, action, mods) =>
+            GLFW.SetKeyCallback(Game.RawWindow, (window, key, code, action, mods) =>
             {
                 CallInputHandler(Node.MainRoot, new KeyEvent()
                 {
@@ -47,11 +47,11 @@ public class Input : ISingleton
         {
             unsafe
             {
-                GLFW.GetCursorPos(Game.Main.RawWindow, out var x, out var y);
+                GLFW.GetCursorPos(Game.RawWindow, out var x, out var y);
                 return new((float)x, (float)y);
             }
         }
-        set { unsafe { GLFW.SetCursorPos(Game.Main.RawWindow, value.x, value.y); } }
+        set { unsafe { GLFW.SetCursorPos(Game.RawWindow, value.x, value.y); } }
     }
     public static CursorMode CursorMode
     {
@@ -59,14 +59,14 @@ public class Input : ISingleton
         {
             unsafe
             {
-                return (CursorMode)GLFW.GetInputMode(Game.Main.RawWindow, CursorStateAttribute.Cursor);
+                return (CursorMode)GLFW.GetInputMode(Game.RawWindow, CursorStateAttribute.Cursor);
             }
         }
         set
         {
             unsafe
             {
-                GLFW.SetInputMode(Game.Main.RawWindow, CursorStateAttribute.Cursor, (CursorModeValue)value);
+                GLFW.SetInputMode(Game.RawWindow, CursorStateAttribute.Cursor, (CursorModeValue)value);
             }
         }
     }
@@ -75,14 +75,14 @@ public class Input : ISingleton
     {
         unsafe
         {
-            return (int)GLFW.GetKey(Game.Main.RawWindow, (Keys)key) != 0;
+            return (int)GLFW.GetKey(Game.RawWindow, (Keys)key) != 0;
         }
     }
     public static bool IsKeyUp(KeyList key)
     {
         unsafe
         {
-            return (int)GLFW.GetKey(Game.Main.RawWindow, (Keys)key) == 0;
+            return (int)GLFW.GetKey(Game.RawWindow, (Keys)key) == 0;
         }
     }
 }

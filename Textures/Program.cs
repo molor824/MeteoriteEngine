@@ -1,4 +1,5 @@
 ﻿using Meteorite;
+using GlmSharp;
 
 public class TexturedSprites : Transform2D
 {
@@ -12,19 +13,21 @@ public class TexturedSprites : Transform2D
     {
         base.Added();
         
-        Scale = new(2, 1);
+        // GlmSharp package is required
+        Scale = new vec2(2, 1);
 
         _sprite = new();
         _sprite1 = new();
         
         AddChildren(_sprite, _sprite1);
 
-        // assuming inside bin/Debug/net6.0
-        _sprite.Texture = new("../../../Contents/raylib.png");
-        _sprite1.Texture = new("../../../Contents/opengl.png");
+        // By default it is set to "Resources" but i'll set it manually to show you how to do so
+        // Check out .csproj to learn how to load files onto output directory
+        Game.ResourcesDir = "Resources";
+        _sprite.Texture = new("raylib.png");
+        _sprite1.Texture = new("opengl.png");
         
-        _sprite.Texture.Upload();
-        _sprite1.Texture.Upload();
+        _sprite1.Color = Color.Red;
         
         // by default, camera's height is 10 units
         _sprite.Texture.PixelsPerUnit = 100;
@@ -46,9 +49,9 @@ static class Program
 {
     static void Main()
     {
-        var game = new Game("Textures", 800, 600);
+        Game.New("Textures");
 
-        game.AddNode(new TexturedSprites());
-        game.Run();
+        Game.AddNode(new TexturedSprites());
+        Game.Run();
     }
 }
