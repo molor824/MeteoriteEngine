@@ -11,24 +11,29 @@ using System;
 
 public class Texture
 {
-    public vec2 Size => new(_image.Width, _image.Height);
+    public vec2 Size => new(_width, _height);
+    public int Width => _width;
+    public int Height => _height;
     public float PixelsPerUnit = 1;
 
-    Image<Rgba32> _image;
     int _handle;
+    int _width, _height;
 
     public Texture(string path)
     {
         var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        
-		_image = Image.Load<Rgba32>(Path.Join(asmPath, path));
-		_image.Mutate(x => x.Flip(FlipMode.Vertical));
+        var image = Image.Load<RgbaVector>(Path.Join(asmPath, path));
+
+        Upload(image);
     }
     public Texture(Color[] pixels, int width, int height)
     {
-        _image = Image.LoadPixelData<Rgba32>(Unsafe.As<Rgba32[]>(pixels), width, height);
+        var image = Image.LoadPixelData<RgbaVector>(Unsafe.As<RgbaVector[]>(pixels), width, height);
+
+        Upload(image);
     }
     public void Upload(
+        Image<RgbaVector> image,
         TextureMinFilter minFilter = TextureMinFilter.NearestMipmapLinear,
         TextureMagFilter magFilter = TextureMagFilter.Linear,
         TextureWrapMode wrapS = TextureWrapMode.Repeat,
@@ -36,8 +41,8 @@ public class Texture
         Color? borderColor = null
     )
     {
-        var pixels = new Rgba32[_image.Width * _image.Height];
-		_image.CopyPixelDataTo(pixels);
+        var pixels = new RgbaVector[image.Width * image.Height];
+        image.CopyPixelDataTo(pixels);
 
 		GL.TexParameter(
 			TextureTarget.Texture2D,
@@ -71,7 +76,7 @@ public class Texture
 
         GL.TexImage2D(
             TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-            _image.Width, _image.Height, 0,
+            image.Width, image.Height, 0,
             PixelFormat.Rgba, PixelType.Float, pixels
         );
 
