@@ -11,34 +11,32 @@ public class Camera : Transform
     /// <summary>
     /// Projection matrix updates every render frame instead of everytime when property getter is called
     /// </summary>
-    public Matrix4 ProjectionMatrix => _projectionMatrix;
+    public mat4 ProjectionMatrix => _projectionMatrix;
 
-    private Matrix4 _projectionMatrix = Matrix4.Identity;
+    private mat4 _projectionMatrix = mat4.Identity;
 
     public override void Render(float delta)
     {
         var aspect = (float)Game.Width / Game.Height;
         
-        _projectionMatrix = Matrix4.Identity;
-
         if (Projection == CameraProjection.Perspective)
         {
-            var f = MathF.Tan(Fovy / 2f);
-
-            _projectionMatrix.M44 = 0;
-            _projectionMatrix.M43 = -1;
-            _projectionMatrix.M11 = 1f / (aspect * f);
-            _projectionMatrix.M22 = 1f / f;
-            _projectionMatrix.M33 = -(Far + Near) / (Far - Near);
-            _projectionMatrix.M34 = -(2f * Far * Near) / (Far - Near);
+            var f = MathF.Tan(Fovy * MathConst.Deg2Rad / 2f);
+            
+            _projectionMatrix.m33 = 0;
+            _projectionMatrix.m23 = -1;
+            _projectionMatrix.m00 = 1f / (aspect * f);
+            _projectionMatrix.m11 = 1f / f;
+            _projectionMatrix.m22 = -(Far + Near) / (Far - Near);
+            _projectionMatrix.m32 = -(2f * Far * Near) / (Far - Near);
 
             return;
         }
         
-        _projectionMatrix.M11 = 2f / (aspect * Size);
-        _projectionMatrix.M22 = 2f / Size;
-        _projectionMatrix.M33 = -2f / (Far - Near);
-        _projectionMatrix.M34 = -(Far + Near) / (Far - Near);
+        _projectionMatrix.m00 = 2f / (aspect * Size);
+        _projectionMatrix.m11 = 2f / Size;
+        _projectionMatrix.m22 = -2f / (Far - Near);
+        _projectionMatrix.m32 = -(Far + Near) / (Far - Near);
     }
 
     public Camera() { }

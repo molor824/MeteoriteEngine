@@ -2,12 +2,12 @@
 
 public static class MathExtension
 {
-    public static Vector3 MoveTowards(this Vector3 a, Vector3 target, float delta)
+    public static vec3 MoveTowards(this vec3 a, vec3 target, float delta)
     {
         var diff = target - a;
-        var len = diff.LengthSquared;
+        var len = diff.LengthSqr;
 
-        if (len > delta * delta) return a + target.Normalized() * delta;
+        if (len > delta * delta) return a + diff.NormalizedSafe * delta;
         return target;
     }
 }

@@ -19,11 +19,11 @@ public class Sprite : Transform2D
         },
         new ushort[] { 0, 3, 2, 2, 1, 0 }
     );
-    static Texture _default = new(new[] { Color4.White }, 1, 1);
+    static Texture _default = new(new[] { Color.White }, 1, 1);
     static Shader _shader = Shader.Default;
 
     public Texture? Texture = null;
-    public Color4 Color = Color4.White;
+    public Color Color = Color.White;
 
     public override void Render(float delta)
     {
@@ -36,12 +36,10 @@ public class Sprite : Transform2D
         var camTransform = Game.MainCamera.GlobalTransformMatrix;
         var globalTransform = GlobalTransformMatrix;
         
-        camTransform.Invert();
-
-        var transform = projection * camTransform * globalTransform;
+        var transform = projection * camTransform.Inverse * globalTransform;
         
-        GL.Uniform4(_shader.GetUniformLocation("textureColor"), Color);
-        _shader.SetMat4("transform", true, ref transform);
+        GL.Uniform4(_shader.GetUniformLocation("textureColor"), Color.R, Color.G, Color.B, Color.A);
+        _shader.SetMat4("transform", false, transform);
         
         GL.UseProgram(_shader.Program);
         texture.Bind();

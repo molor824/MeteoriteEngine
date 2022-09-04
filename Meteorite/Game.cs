@@ -156,8 +156,10 @@ public static class Game
         foreach (var singleton in _singletons) singleton.Start();
 
         var updateThread = new Thread(UpdateLoop);
-        var stopwatch = Stopwatch.StartNew();
+        
         updateThread.Start();
+        
+        var stopwatch = Stopwatch.StartNew();
 
         while (!WindowShouldClose)
         {
@@ -182,7 +184,7 @@ public static class Game
         
         _shouldClose = true;
         GLFW.Terminate();
-        
+
         updateThread.Join();
         
         Log.Success("Window closed!");

@@ -4,7 +4,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class Input : ISingleton
 {
-    static Vector2 _lastMousePos;
+    static vec2 _lastMousePos;
     static Input()
     {
         Game.AddSingleton<Input>();
@@ -15,7 +15,7 @@ public class Input : ISingleton
         {
             GLFW.SetCursorPosCallback(Game.RawWindow, (_, x, y) =>
             {
-                var position = new Vector2((float)x, (float)y);
+                var position = new vec2((float)x, (float)y);
 
                 CallInputHandler(Node.MainRoot, new MouseMotionEvent()
                 {
@@ -41,7 +41,7 @@ public class Input : ISingleton
         root.InputHandler(ievent);
         for (var i = 0; i < root.ChildrenCount; i++) CallInputHandler(root.GetChild(i), ievent);
     }
-    public static Vector2 MousePosition
+    public static vec2 MousePosition
     {
         get
         {
@@ -51,7 +51,7 @@ public class Input : ISingleton
                 return new((float)x, (float)y);
             }
         }
-        set { unsafe { GLFW.SetCursorPos(Game.RawWindow, value.X, value.Y); } }
+        set { unsafe { GLFW.SetCursorPos(Game.RawWindow, value.x, value.y); } }
     }
     public static CursorModeValue CursorMode
     {

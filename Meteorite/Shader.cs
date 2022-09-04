@@ -1,4 +1,6 @@
-﻿namespace Meteorite;
+﻿using System.Runtime.CompilerServices;
+
+namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -19,7 +21,8 @@ uniform mat4 transform;
 
 void main()
 {
-    gl_Position = transform * vec4(aPos, 1);
+    vec4 position = transform * vec4(aPos, 1);
+	gl_Position = position;
     fTexCoord = aTexCoord;
     fColor = aColor;
 }
@@ -44,9 +47,12 @@ void main()
 
     internal int Program;
 
-    public void SetMat4(string location, bool transpose, ref Matrix4 value)
+    public void SetMat4(string location, bool transpose, mat4 value)
     {
-	    GL.UniformMatrix4(GetUniformLocation(location), transpose, ref value);
+	    unsafe
+	    {
+		    GL.UniformMatrix4(GetUniformLocation(location), 1, transpose, (float*)&value);
+	    }
     }
     internal int GetUniformLocation(string location)
     {

@@ -1,6 +1,6 @@
 ﻿using Meteorite;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+using GlmSharp;
 
 static class Program
 {
@@ -26,7 +26,7 @@ static class Program
         {
             base.Update(delta);
             
-            Rotation *= Quaternion.FromAxisAngle(Vector3.UnitY, _rotationSpeed * delta * MathConst.Deg2Rad);
+            Rotation *= quat.FromAxisAngle(_rotationSpeed * delta * MathConst.Deg2Rad, vec3.UnitY);
         }
     }
     class RotatingSprite : Sprite
@@ -40,8 +40,8 @@ static class Program
             Scale = new(2, 2);
             Texture = new(new[]
             {
-                Color4.Green, Color4.Red,
-                Color4.Red, Color4.Green
+                Color.Green, Color.Red,
+                Color.Red, Color.Green
             }, 2, 2, new()
             {
                 MagFilter = TextureMagFilter.Nearest

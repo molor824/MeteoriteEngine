@@ -1,14 +1,11 @@
-using System.Xml.Serialization;
-using OpenTK.Mathematics;
-
 namespace Meteorite;
 
 public class Transform : Node
 {
-    public Vector3 Position;
-    public Vector3 Scale = new(1);
-    public Quaternion Rotation = Quaternion.Identity;
-    public Matrix4 GlobalTransformMatrix
+    public vec3 Position;
+    public vec3 Scale = new(1);
+    public quat Rotation = quat.Identity;
+    public mat4 GlobalTransformMatrix
     {
         get
         {
@@ -26,24 +23,20 @@ public class Transform : Node
         }
     }
 
-    public Matrix4 TransformMatrix
+    public mat4 TransformMatrix
     {
         get
         {
             // CreateTranslation creates translation in last row instead of last column
             // Not sure why, i thought it was supposed to be the last column
-            var translation = Matrix4.Identity;
-            var rotation = Matrix4.CreateFromQuaternion(Rotation);
-            var scale = Matrix4.CreateScale(Scale);
-
-            translation.M14 = Position.X;
-            translation.M24 = Position.Y;
-            translation.M34 = Position.Z;
+            var translation = mat4.Translate(Position);
+            var rotation = glm.ToMat4(Rotation);
+            var scale = mat4.Scale(Scale);
 
             return translation * rotation * scale;
         }
     }
-    public Vector3 GlobalPosition
+    public vec3 GlobalPosition
     {
         get
         {
@@ -78,7 +71,7 @@ public class Transform : Node
                     // same order but in reverse
                     position -= p.Position;
                     // changing multipication order should reverse it
-                    position = Rotation.Inverted() * position;
+                    position = Rotation.Inverse * position;
                     position /= p.Scale;
                 }
 
@@ -88,7 +81,7 @@ public class Transform : Node
             Position = position;
         }
     }
-    public Vector3 LossyScale
+    public vec3 LossyScale
     {
         get
         {
@@ -121,7 +114,7 @@ public class Transform : Node
             Scale = scale;
         }
     }
-    public Quaternion GlobalRotation
+    public quat GlobalRotation
     {
         get
         {
@@ -151,5 +144,22 @@ public class Transform : Node
 
             Rotation = rotation;
         }
+    }
+
+    public void RotateX(float angle)
+    {
+        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitX);
+    }
+    public void RotateY(float angle)
+    {
+        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitY);
+    }
+    public void RotateZ(float angle)
+    {
+        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitZ);
+    }
+    public void Rotate(vec3 axis, float angle)
+    {
+        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, axis);
     }
 }

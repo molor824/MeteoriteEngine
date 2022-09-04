@@ -4,69 +4,69 @@ namespace Meteorite;
 
 public class Transform2D : Transform
 {
-    public Transform Transform3D => (Transform)this;
-    public new Vector2 Position
+    public Transform Transform3D => this;
+    public new vec2 Position
     {
-        get => base.Position.Xy;
-        set => base.Position.Xy = value;
+        get => base.Position.xy;
+        set => base.Position.xy = value;
     }
-    public new Vector2 Scale
+    public new vec2 Scale
     {
-        get => base.Scale.Xy;
-        set => base.Scale.Xy = value;
+        get => base.Scale.xy;
+        set => base.Scale.xy = value;
     }
     public new float Rotation
     {
-        get => base.Rotation.ToEulerAngles().Z * MathConst.Rad2Deg;
+        get => (float)base.Rotation.EulerAngles.z * MathConst.Rad2Deg;
         set
         {
-            var euler = base.Rotation.ToEulerAngles();
-            euler.Z = value * MathConst.Deg2Rad;
-            base.Rotation = new Quaternion(euler);
+            var euler = base.Rotation.EulerAngles;
+            euler.z = value * MathConst.Deg2Rad;
+            base.Rotation = new quat((vec3)euler);
         }
     }
     public float LocalLayer
     {
-        get => base.Position.Z;
-        set => base.Position.Z = value;
+        get => base.Position.z;
+        set => base.Position.z = value;
     }
-    public new Vector2 GlobalPosition
+    public new vec2 GlobalPosition
     {
-        get => base.GlobalPosition.Xy;
+        get => base.GlobalPosition.xy;
         set
         {
             var pos = base.GlobalPosition;
-            pos.Xy = value;
+            pos.xy = value;
             base.GlobalPosition = pos;
         }
     }
-    public new Vector2 LossyScale
+    public new vec2 LossyScale
     {
-        get => base.LossyScale.Xy;
+        get => base.LossyScale.xy;
         set
         {
             var scale = base.LossyScale;
-            scale.Xy = value;
+            scale.xy = value;
             base.LossyScale = scale;
         }
     }
     public new float GlobalRotation
     {
-        get => base.GlobalRotation.ToEulerAngles().Z * MathConst.Rad2Deg;
+        get => (float)base.GlobalRotation.EulerAngles.z * MathConst.Rad2Deg;
         set
         {
-            var euler = base.GlobalRotation.ToEulerAngles();
-            euler.Z = value * MathConst.Deg2Rad;
-            base.GlobalRotation = new Quaternion(euler);
+            var euler = base.GlobalRotation.EulerAngles;
+            euler.z = value * MathConst.Deg2Rad;
+            base.GlobalRotation = new quat((vec3)euler);
         }
     }
     public float Layer
     {
-        get => base.GlobalPosition.Z;
+        get => base.GlobalPosition.z;
         set
         {
             var pos = base.GlobalPosition;
-            pos.Z = value;
+            pos.z = value;
             base.GlobalPosition = pos;
         }
     }

@@ -2,12 +2,13 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Meteorite;
 
-public class FpsFly : LocalVelocity
+public class FirstPersonFly : LocalVelocity
 {
     public float Acceleration = 100;
     public float Deacceleration = 50;
     public float Speed = 10;
     public float RunSpeed = 20;
+    public float Sensitivity = 0.5f;
 
     float _xrot, _yrot;
     bool _mouseLocked = true;
@@ -27,12 +28,9 @@ public class FpsFly : LocalVelocity
         {
             var delta = motion.Delta;
 
-            _xrot -= delta.Y;
-            _xrot = MathHelper.Clamp(_xrot, -90, 90);
-            _yrot += delta.X;
-
-            Rotation = Quaternion.FromAxisAngle(Vector3.UnitX, MathHelper.DegreesToRadians(_xrot))
-                       * Quaternion.FromAxisAngle(Vector3.UnitY, MathHelper.DegreesToRadians(_yrot));
+            _xrot -= delta.y * Sensitivity;
+            _xrot = glm.Clamp(_xrot, -90, 90);
+            _yrot -= delta.x * Sensitivity;
         }
         else if (ievent is KeyEvent key)
         {
@@ -48,17 +46,22 @@ public class FpsFly : LocalVelocity
     {
         base.Update(delta);
 
-        var direction = new Vector3();
+        Rotation = quat.FromAxisAngle(_yrot * MathConst.Deg2Rad, vec3.UnitY) *
+                   quat.FromAxisAngle(_xrot * MathConst.Deg2Rad, vec3.UnitX);
+
+        var direction = new vec3();
         var crntSpeed = Input.IsKeyDown(Keys.LeftShift) ? RunSpeed : Speed;
 
-        if (Input.IsKeyDown(Keys.W)) direction.Z--;
-        if (Input.IsKeyDown(Keys.S)) direction.Z++;
-        if (Input.IsKeyDown(Keys.D)) direction.X--;
-        if (Input.IsKeyDown(Keys.A)) direction.X++;
-        if (Input.IsKeyDown(Keys.Q)) direction.Y--;
-        if (Input.IsKeyDown(Keys.E)) direction.Y++;
-
-        var acceleration = direction == new Vector3() ? Deacceleration : Acceleration;
+        if (Input.IsKeyDown(Keys.W)) direction.z--;
+        if (Input.IsKeyDown(Keys.S)) direction.z++;
+        if (Input.IsKeyDown(Keys.D)) direction.x++;
+        if (Input.IsKeyDown(Keys.A)) direction.x--;
+        if (Input.IsKeyDown(Keys.Q)) direction.y--;
+        if (Input.IsKeyDown(Keys.E)) direction.y++;
+        
+        direction = Rotation * direction;
+        
+        var acceleration = direction == new vec3() ? Deacceleration : Acceleration;
 
         Linear = Linear.MoveTowards(direction * crntSpeed, acceleration * delta);
     }
