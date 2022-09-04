@@ -1,11 +1,14 @@
+using System.Xml.Serialization;
+using OpenTK.Mathematics;
+
 namespace Meteorite;
 
 public class Transform : Node
 {
-    public vec3 Position;
-    public vec3 Scale = new(1);
-    public quat Rotation = quat.Identity;
-    public mat4 GlobalTransformMatrix
+    public Vector3 Position;
+    public Vector3 Scale = new(1);
+    public Quaternion Rotation = Quaternion.Identity;
+    public Matrix4 GlobalTransformMatrix
     {
         get
         {
@@ -22,12 +25,25 @@ public class Transform : Node
             return matrix;
         }
     }
-    public mat4 TransformMatrix =>
-        mat4.Translate(Position) *
-        glm.ToMat4(Rotation) *
-        mat4.Scale(Scale)
-    ;
-    public vec3 GlobalPosition
+
+    public Matrix4 TransformMatrix
+    {
+        get
+        {
+            // CreateTranslation creates translation in last row instead of last column
+            // Not sure why, i thought it was supposed to be the last column
+            var translation = Matrix4.Identity;
+            var rotation = Matrix4.CreateFromQuaternion(Rotation);
+            var scale = Matrix4.CreateScale(Scale);
+
+            translation.M14 = Position.X;
+            translation.M24 = Position.Y;
+            translation.M34 = Position.Z;
+
+            return translation * rotation * scale;
+        }
+    }
+    public Vector3 GlobalPosition
     {
         get
         {
@@ -62,7 +78,7 @@ public class Transform : Node
                     // same order but in reverse
                     position -= p.Position;
                     // changing multipication order should reverse it
-                    position = position * Rotation;
+                    position = Rotation.Inverted() * position;
                     position /= p.Scale;
                 }
 
@@ -72,7 +88,7 @@ public class Transform : Node
             Position = position;
         }
     }
-    public vec3 LossyScale
+    public Vector3 LossyScale
     {
         get
         {
@@ -105,7 +121,7 @@ public class Transform : Node
             Scale = scale;
         }
     }
-    public quat GlobalRotation
+    public Quaternion GlobalRotation
     {
         get
         {

@@ -1,5 +1,5 @@
 ﻿using Meteorite;
-using GlmSharp;
+using OpenTK.Graphics.OpenGL;
 
 public class TexturedSprites : Transform2D
 {
@@ -12,10 +12,10 @@ public class TexturedSprites : Transform2D
     public override void Added()
     {
         base.Added();
-        
-        // GlmSharp package is required
-        Scale = new vec2(2, 1);
 
+        Scale = new(2, 1);
+
+        // Make sure to create sprite after `Game.New()` otherwise it throws error
         _sprite = new();
         _sprite1 = new();
         
@@ -25,10 +25,13 @@ public class TexturedSprites : Transform2D
         // Check out .csproj to learn how to load files onto output directory
         Game.ResourcesDir = "Resources";
         _sprite.Texture = new("raylib.png");
-        _sprite1.Texture = new("opengl.png");
-        
-        _sprite1.Color = Color.Red;
-        
+        // Custom texture parameters
+        // OpenTK is required for advanced render options
+        _sprite1.Texture = new("opengl.png", new()
+        {
+            MagFilter = TextureMagFilter.Nearest
+        });
+
         // by default, camera's height is 10 units
         _sprite.Texture.PixelsPerUnit = 100;
         _sprite1.Texture.PixelsPerUnit = 50;
@@ -49,7 +52,7 @@ static class Program
 {
     static void Main()
     {
-        Game.New("Textures");
+        Game.New("Test");
 
         Game.AddNode(new TexturedSprites());
         Game.Run();

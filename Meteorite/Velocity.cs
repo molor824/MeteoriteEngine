@@ -2,8 +2,8 @@ namespace Meteorite;
 
 public class LocalVelocity : Transform
 {
-    public vec3 Linear;
-    public quat Angular;
+    public Vector3 Linear;
+    public Quaternion Angular;
 
     public override void Update(float delta)
     {

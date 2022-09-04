@@ -1,23 +1,45 @@
+using OpenTK.Graphics.OpenGL;
+
 namespace Meteorite;
 
 public class Camera : Transform
 {
     public CameraProjection Projection = CameraProjection.Orthographic;
-    public float Fovy = 70;
+    public float Fovy = 90;
     public float Size = 10;
     public float Near = -1000, Far = 1000;
-    public mat4 ProjectionMatrix
-    {
-        get
-        {
-            var ratio = (float)Game.Width / Game.Height;
+    /// <summary>
+    /// Projection matrix updates every render frame instead of everytime when property getter is called
+    /// </summary>
+    public Matrix4 ProjectionMatrix => _projectionMatrix;
 
-            return Projection == CameraProjection.Perspective
-                ? mat4.Perspective(Fovy, ratio, Near, Far)
-                : mat4.Ortho(ratio / -2 * Size, ratio / 2 * Size, Size / -2, Size / 2, Near, Far);
+    private Matrix4 _projectionMatrix = Matrix4.Identity;
+
+    public override void Render(float delta)
+    {
+        var aspect = (float)Game.Width / Game.Height;
+        
+        _projectionMatrix = Matrix4.Identity;
+
+        if (Projection == CameraProjection.Perspective)
+        {
+            var f = MathF.Tan(Fovy / 2f);
+
+            _projectionMatrix.M44 = 0;
+            _projectionMatrix.M43 = -1;
+            _projectionMatrix.M11 = 1f / (aspect * f);
+            _projectionMatrix.M22 = 1f / f;
+            _projectionMatrix.M33 = -(Far + Near) / (Far - Near);
+            _projectionMatrix.M34 = -(2f * Far * Near) / (Far - Near);
+
+            return;
         }
+        
+        _projectionMatrix.M11 = 2f / (aspect * Size);
+        _projectionMatrix.M22 = 2f / Size;
+        _projectionMatrix.M33 = -2f / (Far - Near);
+        _projectionMatrix.M34 = -(Far + Near) / (Far - Near);
     }
-    public mat4 WorldToCamera => GlobalTransformMatrix * ProjectionMatrix;
 
     public Camera() { }
 

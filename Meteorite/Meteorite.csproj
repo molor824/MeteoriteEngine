@@ -10,10 +10,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GlmSharp" Version="0.9.8" />
 		<PackageReference Include="OpenTK" Version="4.7.4" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
-		<Using Include="GlmSharp" />
+		<Using Include="OpenTK.Mathematics" />
 	</ItemGroup>
 
 </Project>

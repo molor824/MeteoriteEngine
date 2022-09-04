@@ -1,48 +1,33 @@
-﻿namespace Meteorite;
+﻿using OpenTK.Mathematics;
+
+namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 
 public class Mesh
 {
-    public Shader Shader = new();
-
-	ushort[] _indices;
-	Vertex[] _vertices;
-	Color[]? _colors;
-	int _vao, _vertexBuffer, _colorBuffer, _ebo;
+    int _vao, _vertexBuffer, _colorBuffer, _ebo, _indexCount;
 
 	public Mesh(Vertex[] vertices, ushort[] indices)
 	{
-		_vertices = vertices;
-		_indices = indices;
-		Upload();
+        Upload(vertices, indices, null);
 	}
-	public Mesh(Vertex[] vertices, ushort[] indices, Color[]? vertexColors)
+    public Mesh(Vertex[] vertices, ushort[] indices, Color4[] vertexColors)
 	{
-		_vertices = vertices;
-		_indices = indices;
-		_colors = vertexColors;
-		Upload();
+        Upload(vertices, indices, vertexColors);
     }
 
-    public void Render(mat4 transform)
+    public void Render()
     {
-	    GL.UseProgram(Shader.Program);
-	    
-	    unsafe
-	    {
-		    GL.UniformMatrix4(Shader.GetUniformLocation("transform"), 1, false, (float*)&transform);
-	    }
-
 		GL.BindVertexArray(_vao);
-		GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedShort, _ebo);
+        GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedShort, 0);
 	}
-	void Upload()
-	{
-		if (_vao != 0) return;
-		
-		// Note to self: Always bind vertex array first
-		_vao = GL.GenVertexArray();
+    void Upload(Vertex[] vertices, ushort[] indices, Color4[]? vertexColors)
+    {
+        _indexCount = indices.Length;
+
+        // Note to self: Always bind vertex array first
+        _vao = GL.GenVertexArray();
 		GL.BindVertexArray(_vao);
 
 		unsafe
@@ -52,8 +37,8 @@ public class Mesh
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
 			GL.BufferData(
 				BufferTarget.ElementArrayBuffer,
-				sizeof(ushort) * _indices.Length,
-				_indices,
+                sizeof(ushort) * indices.Length,
+                indices,
 				BufferUsageHint.StaticDraw
 			);
 
@@ -62,8 +47,8 @@ public class Mesh
 			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
 			GL.BufferData(
 				BufferTarget.ArrayBuffer,
-				sizeof(Vertex) * _vertices.Length,
-				_vertices,
+                sizeof(Vertex) * vertices.Length,
+                vertices,
 				BufferUsageHint.StaticDraw
 			);
 
@@ -73,21 +58,21 @@ public class Mesh
 			GL.EnableVertexAttribArray(0);
 
 			GL.VertexAttribPointer(
-				1, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), sizeof(vec3)
+				1, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), sizeof(Vector3)
 			);
 			GL.EnableVertexAttribArray(1);
 
-			if (_colors != null)
+            if (vertexColors != null)
 			{
-				if (_colors.Length == _vertices.Length)
+                if (vertexColors.Length == vertices.Length)
 				{
 					_colorBuffer = GL.GenBuffer();
 
 					GL.BindBuffer(BufferTarget.ArrayBuffer, _colorBuffer);
 					GL.BufferData(
 						BufferTarget.ArrayBuffer,
-						sizeof(vec3) * _colors.Length,
-						_colors,
+                        sizeof(Color4) * vertexColors.Length,
+                        vertexColors,
 						BufferUsageHint.StaticDraw
 					);
 
@@ -99,7 +84,7 @@ public class Mesh
 				else
 				{
 					Log.Error(
-						$"Vertex colors length is not matching with vertices length ({_colors.Length} != {_vertices.Length}), didn't set color buffer"
+                        $"Vertex colors length is not matching with vertices length ({vertexColors.Length} != {vertices.Length}), didn't set color buffer"
 					);
 				}
 			}
@@ -113,7 +98,7 @@ public class Mesh
 		GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 		GL.BindVertexArray(0);
 
-		if (_colors != null) GL.DeleteBuffer(_colorBuffer);
+        if (_colorBuffer != 0) GL.DeleteBuffer(_colorBuffer);
 		GL.DeleteBuffer(_vertexBuffer);
 		GL.DeleteBuffer(_ebo);
 		GL.DeleteBuffer(_vao);
@@ -126,15 +111,15 @@ public class Mesh
 }
 public struct Vertex
 {
-	public vec3 Position;
-	public vec2 TexCoord;
+	public Vector3 Position;
+	public Vector2 TexCoord;
 
-	public Vertex(vec3 position)
+	public Vertex(Vector3 position)
 	{
 		Position = position;
 		TexCoord = new();
 	}
-	public Vertex(vec3 position, vec2 texcoord)
+	public Vertex(Vector3 position, Vector2 texcoord)
 	{
 		Position = position;
 		TexCoord = texcoord;

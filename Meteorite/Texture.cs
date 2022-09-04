@@ -11,7 +11,7 @@ using System;
 
 public class Texture
 {
-    public vec2 Size => new(_width, _height);
+    public Vector2 Size => new(_width, _height);
     public int Width => _width;
     public int Height => _height;
     public float PixelsPerUnit = 1;
@@ -25,7 +25,7 @@ public class Texture
 
         Upload(image, tParams ?? new());
     }
-    public Texture(IEnumerable<Color> pixels, int width, int height, TextureParameters? tParams = null)
+    public Texture(IEnumerable<Color4> pixels, int width, int height, TextureParameters? tParams = null)
     {
         var image = Image.LoadPixelData(pixels.Select(
             p => new RgbaVector(
@@ -111,7 +111,7 @@ public struct TextureParameters
     public TextureMinFilter MinFilter = TextureMinFilter.NearestMipmapLinear;
     public TextureMagFilter MagFilter = TextureMagFilter.Linear;
     public TextureWrapMode WrapMode = TextureWrapMode.Repeat;
-    public Color BorderColor = Color.Black;
+    public Color4 BorderColor = Color4.Black;
 
     public TextureParameters() { }
 }

@@ -16,7 +16,7 @@ public class FpsFly : LocalVelocity
     {
         base.Start();
 
-        Input.CursorMode = CursorMode.Disabled;
+        Input.CursorMode = CursorModeValue.CursorDisabled;
     }
 
     public override void InputHandler(InputEvent ievent)
@@ -27,18 +27,19 @@ public class FpsFly : LocalVelocity
         {
             var delta = motion.Delta;
 
-            _xrot -= delta.y;
-            _xrot = glm.Clamp(_xrot, -90, 90);
-            _yrot += delta.x;
+            _xrot -= delta.Y;
+            _xrot = MathHelper.Clamp(_xrot, -90, 90);
+            _yrot += delta.X;
 
-            Rotation = quat.FromAxisAngle(_xrot, vec3.UnitX) * quat.FromAxisAngle(_yrot, vec3.UnitY);
+            Rotation = Quaternion.FromAxisAngle(Vector3.UnitX, MathHelper.DegreesToRadians(_xrot))
+                       * Quaternion.FromAxisAngle(Vector3.UnitY, MathHelper.DegreesToRadians(_yrot));
         }
         else if (ievent is KeyEvent key)
         {
-            if (key.Key == KeyList.Escape && key.State == KeyState.Press)
+            if (key.Key == Keys.Escape && key.State == InputAction.Press)
             {
                 _mouseLocked = !_mouseLocked;
-                Input.CursorMode = _mouseLocked ? CursorMode.Disabled : CursorMode.Normal;
+                Input.CursorMode = _mouseLocked ? CursorModeValue.CursorDisabled : CursorModeValue.CursorNormal;
             }
         }
     }
@@ -47,17 +48,17 @@ public class FpsFly : LocalVelocity
     {
         base.Update(delta);
 
-        var direction = new vec3();
-        var crntSpeed = Input.IsKeyDown(KeyList.LeftShift) ? RunSpeed : Speed;
+        var direction = new Vector3();
+        var crntSpeed = Input.IsKeyDown(Keys.LeftShift) ? RunSpeed : Speed;
 
-        if (Input.IsKeyDown(KeyList.W)) direction.z--;
-        if (Input.IsKeyDown(KeyList.S)) direction.z++;
-        if (Input.IsKeyDown(KeyList.D)) direction.x--;
-        if (Input.IsKeyDown(KeyList.A)) direction.x++;
-        if (Input.IsKeyDown(KeyList.Q)) direction.y--;
-        if (Input.IsKeyDown(KeyList.E)) direction.y++;
+        if (Input.IsKeyDown(Keys.W)) direction.Z--;
+        if (Input.IsKeyDown(Keys.S)) direction.Z++;
+        if (Input.IsKeyDown(Keys.D)) direction.X--;
+        if (Input.IsKeyDown(Keys.A)) direction.X++;
+        if (Input.IsKeyDown(Keys.Q)) direction.Y--;
+        if (Input.IsKeyDown(Keys.E)) direction.Y++;
 
-        var acceleration = direction == vec3.Zero ? Deacceleration : Acceleration;
+        var acceleration = direction == new Vector3() ? Deacceleration : Acceleration;
 
         Linear = Linear.MoveTowards(direction * crntSpeed, acceleration * delta);
     }

@@ -1,5 +1,5 @@
 ﻿using Meteorite;
-using GlmSharp;
+using OpenTK.Mathematics;
 
 static class Program
 {
@@ -9,7 +9,7 @@ static class Program
 
         var sprite = new Sprite()
         {
-            Color = new(1, 1, 1),
+            Color = Color4.White,
             Scale = new(1, 2),
             GlobalRotation = 45,
         };
@@ -17,14 +17,14 @@ static class Program
         {
             Parent = sprite,
             Position = new(1.5f, 0),
-            Color = new(1, 0, 0),
+            Color = Color4.Red,
             Layer = -1,
         };
         var sprite2 = new Sprite()
         {
             Parent = sprite,
             LossyScale = new(1, 1),
-            Color = new(0, 1, 0),
+            Color = Color4.Green,
             Layer = 1,
             Position = new(-1, 1),
             Rotation = 20,

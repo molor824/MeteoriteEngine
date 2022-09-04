@@ -1,17 +1,16 @@
-﻿using System.Runtime.Versioning;
-
-namespace Meteorite;
+﻿namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 public class Shader
 {
-    string _vertexShader =
-@"#version 330 core
+    const string DefaultVertexShader =
+@"#version 330
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
-layout (location = 2) in vec3 aColor;
+layout (location = 2) in vec4 aColor;
 
 out vec4 fColor;
 out vec2 fTexCoord;
@@ -22,11 +21,11 @@ void main()
 {
     gl_Position = transform * vec4(aPos, 1);
     fTexCoord = aTexCoord;
-    fColor = vec4(aColor, 1);
+    fColor = aColor;
 }
 ";
-    string _fragmentShader =
-@"#version 330 core
+    const string DefaultFragmentShader =
+@"#version 330
 
 out vec4 FragColor;
 
@@ -41,22 +40,27 @@ void main()
     FragColor = texture(texture0, fTexCoord) * fColor * textureColor;
 }
 ";
+    public static Shader Default = new(DefaultVertexShader, DefaultFragmentShader);
 
     internal int Program;
 
+    public void SetMat4(string location, bool transpose, ref Matrix4 value)
+    {
+	    GL.UniformMatrix4(GetUniformLocation(location), transpose, ref value);
+    }
     internal int GetUniformLocation(string location)
     {
 	    return GL.GetUniformLocation(Program, location);
     }
-    void Upload()
+    void Upload(string vertexShader, string fragmentShader)
     {
 	    if (Program != 0) return;
 
 		var vs = GL.CreateShader(ShaderType.VertexShader);
 		var fs = GL.CreateShader(ShaderType.FragmentShader);
 
-		GL.ShaderSource(vs, _vertexShader);
-		GL.ShaderSource(fs, _fragmentShader);
+        GL.ShaderSource(vs, vertexShader);
+        GL.ShaderSource(fs, fragmentShader);
 
 		GL.CompileShader(vs);
 		GL.CompileShader(fs);
@@ -116,15 +120,9 @@ void main()
 		return new(ResourceLoader.LoadTextFile(vsPath), ResourceLoader.LoadTextFile(fsPath));
 	}
 
-	public Shader()
-	{
-		Upload();
-	}
     public Shader(string vertexShader, string fragmentShader)
 	{
-		_vertexShader = vertexShader;
-		_fragmentShader = fragmentShader;
-		Upload();
+        Upload(vertexShader, fragmentShader);
 	}
 
     ~Shader()

@@ -97,7 +97,6 @@ public static class Game
                 throw Log.Panic("Failed to create window!");
             }
 
-
             GLFW.MakeContextCurrent(window);
             GLFW.SetFramebufferSizeCallback(window, Resize);
             GLFW.SwapInterval(1);
@@ -111,6 +110,9 @@ public static class Game
             
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.CullFace);
+            
+            GL.CullFace(CullFaceMode.Back);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
@@ -167,15 +169,16 @@ public static class Game
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.Clear(ClearBufferMask.DepthBufferBit);
 
-            Render(Node.MainRoot, elapsed);
             foreach (var singleton in _singletons) singleton.Render(elapsed);
-
+            MainCamera.Render(0);
+            Render(Node.MainRoot, elapsed);
+            
             GLFW.PollEvents();
             SwapBuffers();
         }
 
-        Close(Node.MainRoot);
         foreach (var singleton in _singletons) singleton.Close();
+        Close(Node.MainRoot);
         
         _shouldClose = true;
         GLFW.Terminate();
@@ -197,8 +200,8 @@ public static class Game
 
             lastElapsed += deltaTick;
 
-            Update(Node.MainRoot, FixedUpdateDelta);
             foreach (var singleton in _singletons) singleton.Update(FixedUpdateDelta);
+            Update(Node.MainRoot, FixedUpdateDelta);
         }
     }
 
@@ -241,9 +244,4 @@ enum State
 {
     Added,
     Removed
-}
-struct GameObjectState
-{
-    public Node Value;
-    public State State;
 }
