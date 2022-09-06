@@ -7,8 +7,6 @@ static class Program
     static void Main()
     {
         Game.New("First Person Flying");
-        
-        GL.Disable(EnableCap.CullFace);
 
         var cam = Game.MainCamera;
         cam.Projection = CameraProjection.Perspective;

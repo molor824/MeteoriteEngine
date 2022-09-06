@@ -40,8 +40,8 @@ static class Program
             Scale = new(2, 2);
             Texture = new(new[]
             {
-                Color.Green, Color.Red,
-                Color.Red, Color.Green
+                Color.Blue, Color.Red,
+                Color.Red, Color.Blue
             }, 2, 2, new()
             {
                 MagFilter = TextureMagFilter.Nearest
@@ -59,9 +59,6 @@ static class Program
     static void Main()
     {
         Game.New("Perspective Camera");
-        
-        // Disabling it to see the back side of sprite aswell
-        GL.Disable(EnableCap.CullFace);
 
         Game.AddNode(new RotatingSprite());
         Game.AddNode(new RotatingCamera());

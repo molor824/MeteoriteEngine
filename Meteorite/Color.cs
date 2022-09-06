@@ -3,6 +3,9 @@
 public struct Color
 {
     public static Color Black => new(0, 0, 0);
+    public static Color Gray => new(0.5f, 0.5f, 0.5f);
+    public static Color DarkGray => new(0.25f, 0.25f, 0.25f);
+    public static Color LightGray => new(0.75f, 0.75f, 0.75f);
     public static Color White => new(1, 1, 1);
     public static Color Red => new(1, 0, 0);
     public static Color Green => new(0, 1, 0);

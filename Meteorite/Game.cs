@@ -158,7 +158,13 @@ public static class Game
         var updateThread = new Thread(UpdateLoop);
         
         updateThread.Start();
-        
+
+        var test = new Sprite()
+        {
+            Color = new(1, 1, 1, 0.5f),
+            Position = new(4, 4),
+            Scale = new(3, 2)
+        };
         var stopwatch = Stopwatch.StartNew();
 
         while (!WindowShouldClose)
@@ -166,6 +172,8 @@ public static class Game
             var elapsed = (float)stopwatch.Elapsed.TotalSeconds;
 
             stopwatch.Restart();
+
+            GL.Enable(EnableCap.DepthTest);
             
             GL.ClearColor(0, 0, 0, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit);
@@ -174,7 +182,9 @@ public static class Game
             foreach (var singleton in _singletons) singleton.Render(elapsed);
             MainCamera.Render(0);
             Render(Node.MainRoot, elapsed);
-            
+
+            GL.Disable(EnableCap.DepthTest);
+
             GLFW.PollEvents();
             SwapBuffers();
         }
@@ -241,9 +251,4 @@ public static class Game
             "Here' your prize for breaking the game engine: https://youtu.be/hiRacdl02w4"
         );
     }
-}
-enum State
-{
-    Added,
-    Removed
 }

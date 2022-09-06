@@ -47,6 +47,10 @@ void main()
 
     internal int Program;
 
+    public void UseProgram()
+    {
+        GL.UseProgram(Program);
+    }
     public void SetMat4(string location, bool transpose, mat4 value)
     {
 	    unsafe

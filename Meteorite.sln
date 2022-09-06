@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerspectiveCamera", "Perspe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstPersonView", "FirstPersonView\FirstPersonView.csproj", "{9002A865-2A72-4869-A106-08287420964C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloTriangle", "hellotriangle\HelloTriangle.csproj", "{DFBA174F-C645-48F8-AE88-1331BA32540D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{9002A865-2A72-4869-A106-08287420964C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9002A865-2A72-4869-A106-08287420964C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9002A865-2A72-4869-A106-08287420964C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFBA174F-C645-48F8-AE88-1331BA32540D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFBA174F-C645-48F8-AE88-1331BA32540D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFBA174F-C645-48F8-AE88-1331BA32540D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFBA174F-C645-48F8-AE88-1331BA32540D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

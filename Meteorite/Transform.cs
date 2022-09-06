@@ -27,13 +27,11 @@ public class Transform : Node
     {
         get
         {
-            // CreateTranslation creates translation in last row instead of last column
-            // Not sure why, i thought it was supposed to be the last column
-            var translation = mat4.Translate(Position);
-            var rotation = glm.ToMat4(Rotation);
-            var scale = mat4.Scale(Scale);
+            var transform = glm.ToMat4(Rotation) * mat4.Scale(Scale);
 
-            return translation * rotation * scale;
+            transform.Column3 = new(Position, 1);
+
+            return transform;
         }
     }
     public vec3 GlobalPosition

@@ -1,6 +1,4 @@
-﻿using OpenTK.Mathematics;
-
-namespace Meteorite;
+﻿namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 
@@ -12,7 +10,7 @@ public class Mesh
 	{
         Upload(vertices, indices, null);
 	}
-    public Mesh(Vertex[] vertices, ushort[] indices, Color4[] vertexColors)
+    public Mesh(Vertex[] vertices, ushort[] indices, Color[] vertexColors)
 	{
         Upload(vertices, indices, vertexColors);
     }
@@ -22,7 +20,7 @@ public class Mesh
 		GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedShort, 0);
 	}
-    void Upload(Vertex[] vertices, ushort[] indices, Color4[]? vertexColors)
+    void Upload(Vertex[] vertices, ushort[] indices, Color[]? vertexColors)
     {
         _indexCount = indices.Length;
 
@@ -58,7 +56,7 @@ public class Mesh
 			GL.EnableVertexAttribArray(0);
 
 			GL.VertexAttribPointer(
-				1, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), sizeof(Vector3)
+                1, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), sizeof(vec3)
 			);
 			GL.EnableVertexAttribArray(1);
 
@@ -71,7 +69,7 @@ public class Mesh
 					GL.BindBuffer(BufferTarget.ArrayBuffer, _colorBuffer);
 					GL.BufferData(
 						BufferTarget.ArrayBuffer,
-                        sizeof(Color4) * vertexColors.Length,
+                        sizeof(Color) * vertexColors.Length,
                         vertexColors,
 						BufferUsageHint.StaticDraw
 					);
@@ -89,7 +87,7 @@ public class Mesh
 				}
 			}
 		}
-		
+
 		Log.Success("[ID: {0}] Mesh loaded!", _vao);
 	}
 	void Unload()
@@ -111,15 +109,15 @@ public class Mesh
 }
 public struct Vertex
 {
-	public Vector3 Position;
-	public Vector2 TexCoord;
+    public vec3 Position;
+    public vec2 TexCoord;
 
-	public Vertex(Vector3 position)
+    public Vertex(vec3 position)
 	{
 		Position = position;
 		TexCoord = new();
 	}
-	public Vertex(Vector3 position, Vector2 texcoord)
+    public Vertex(vec3 position, vec2 texcoord)
 	{
 		Position = position;
 		TexCoord = texcoord;

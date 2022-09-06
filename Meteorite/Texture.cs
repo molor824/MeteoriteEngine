@@ -100,6 +100,10 @@ public class Texture
     {
         GL.DeleteTexture(_handle);
     }
+    internal static void BindDefault()
+    {
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+    }
     internal void Bind()
     {
         GL.BindTexture(TextureTarget.Texture2D, _handle);
