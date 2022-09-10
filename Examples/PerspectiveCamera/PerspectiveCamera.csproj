@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Meteorite\Meteorite.csproj" />
+      <ProjectReference Include="..\..\Meteorite\Meteorite.csproj" />
     </ItemGroup>
 
 </Project>
