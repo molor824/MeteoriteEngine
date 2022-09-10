@@ -10,14 +10,21 @@ namespace Meteorite;
 public class Sprite : Transform2D
 {
     static Mesh _quad = new(
-        new Vertex[]
+        new vec3[]
         {
-            new(new(-0.5f, 0.5f, 0), new(0, 0)),
-            new(new(0.5f, 0.5f, 0), new(1, 0)),
-            new(new(0.5f, -0.5f, 0), new(1, 1)),
-            new(new(-0.5f, -0.5f, 0), new(0, 1)),
+            new(-0.5f, 0.5f, 0),
+            new(0.5f, 0.5f, 0),
+            new(0.5f, -0.5f, 0),
+            new(-0.5f, -0.5f, 0),
         },
-        new ushort[] { 0, 3, 2, 2, 1, 0 }
+        new ushort[] { 0, 3, 2, 2, 1, 0 },
+        new vec2[]
+        {
+            new(0, 0),
+            new(1, 0),
+            new(1, 1),
+            new(0, 1)
+        }
     );
     static Shader _shader = Shader.Default;
 

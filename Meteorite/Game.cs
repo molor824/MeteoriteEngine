@@ -103,7 +103,7 @@ public static class Game
 
             GL.LoadBindings(new GLFWBindingsContext());
             GL.Enable(EnableCap.DepthTest);
-            GL.VertexAttrib3(2, 1f, 1f, 1f);
+            GL.VertexAttrib4(2, 1f, 1f, 1f, 1f);
             Resize(null, width, height);
 
             _window = (IntPtr)window;

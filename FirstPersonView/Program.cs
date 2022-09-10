@@ -1,6 +1,5 @@
 ﻿using Meteorite;
 using OpenTK.Graphics.OpenGL;
-using GlmSharp;
 
 static class Program
 {
