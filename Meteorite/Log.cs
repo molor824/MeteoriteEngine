@@ -1,17 +1,19 @@
+using System.Text;
+
 public static class Log
 {
 	public static void Print(string fmt, params object?[] objs)
 	{
 #if DEBUG
 		Console.ResetColor();
-		_Print("LOG: " + fmt, objs);
+		Console.WriteLine(_Print("LOG: ", fmt, objs));
 #endif
 	}
 	public static void Warn(string fmt, params object?[] objs)
 	{
 #if DEBUG
 		Console.ForegroundColor = ConsoleColor.Yellow;
-		_Print("WARN: " + fmt, objs);
+		Console.WriteLine(_Print("WARN: ", fmt, objs));
 		Console.ResetColor();
 #endif
 	}
@@ -19,7 +21,7 @@ public static class Log
 	{
 #if DEBUG
 		Console.ForegroundColor = ConsoleColor.Red;
-		_Print("ERR: " + fmt, objs);
+		Console.WriteLine(_Print("ERROR: ", fmt, objs));
 		Console.ResetColor();
 #endif
 	}
@@ -28,7 +30,7 @@ public static class Log
 	{
 #if DEBUG
 		Console.ForegroundColor = ConsoleColor.Green;
-		_Print("SUCCESS: " + fmt, objs);
+		Console.WriteLine(_Print("ERROR: ", fmt, objs));
 		Console.ResetColor();
 #endif
 	}
@@ -36,17 +38,32 @@ public static class Log
 	{
 #if DEBUG
 		Console.ForegroundColor = color;
-		_Print("LOG: " + fmt, objs);
+		Console.WriteLine(_Print("LOG: ", fmt, objs));
 		Console.ResetColor();
 #endif
 	}
 	public static Exception Panic(string fmt, params object?[] objs)
 	{
-		return new Exception("PANIC: " + string.Format(fmt, objs));
+		return new Exception(_Print("PANIC: ", fmt, objs));
 	}
 
-	static void _Print(string fmt, params object?[] objs)
+	static string _Print(string initial, string fmt, params object?[] objs)
 	{
-		Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {fmt}", objs);
+		initial = $"[{DateTime.Now:HH:mm:ss}] {initial}";
+		var builder = new StringBuilder();
+		var result = string.Format(fmt, objs);
+
+		builder.Append(initial);
+
+		for (var i = 0; i < result.Length; i++)
+		{
+			builder.Append(result[i]);
+
+			if (result[i] != '\n') continue;
+
+			builder.Append(initial);
+		}
+
+		return builder.ToString();
 	}
 }

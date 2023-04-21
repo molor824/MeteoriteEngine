@@ -5,6 +5,18 @@ public class Transform : Node
     public vec3 Position;
     public vec3 Scale = new(1);
     public quat Rotation = quat.Identity;
+
+    public mat4 TransformMatrix
+    {
+        get
+        {
+            var transform = glm.ToMat4(Rotation) * mat4.Scale(Scale);
+
+            transform.Column3 = new(Position, 1);
+
+            return transform;
+        }
+    }
     public mat4 GlobalTransformMatrix
     {
         get
@@ -20,18 +32,6 @@ public class Transform : Node
             }
 
             return matrix;
-        }
-    }
-
-    public mat4 TransformMatrix
-    {
-        get
-        {
-            var transform = glm.ToMat4(Rotation) * mat4.Scale(Scale);
-
-            transform.Column3 = new(Position, 1);
-
-            return transform;
         }
     }
     public vec3 GlobalPosition
@@ -144,20 +144,20 @@ public class Transform : Node
         }
     }
 
-    public void RotateX(float angle)
+    public void RotateX(float degree)
     {
-        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitX);
+        Rotation *= quat.FromAxisAngle(degree * MathConst.Deg2Rad, vec3.UnitX);
     }
-    public void RotateY(float angle)
+    public void RotateY(float degree)
     {
-        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitY);
+        Rotation *= quat.FromAxisAngle(degree * MathConst.Deg2Rad, vec3.UnitY);
     }
-    public void RotateZ(float angle)
+    public void RotateZ(float degree)
     {
-        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, vec3.UnitZ);
+        Rotation *= quat.FromAxisAngle(degree * MathConst.Deg2Rad, vec3.UnitZ);
     }
-    public void Rotate(vec3 axis, float angle)
+    public void Rotate(vec3 axis, float degree)
     {
-        Rotation *= quat.FromAxisAngle(angle * MathConst.Deg2Rad, axis);
+        Rotation *= quat.FromAxisAngle(degree * MathConst.Deg2Rad, axis);
     }
 }

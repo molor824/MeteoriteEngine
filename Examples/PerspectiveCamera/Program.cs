@@ -29,7 +29,7 @@ static class Program
             Rotation *= quat.FromAxisAngle(_rotationSpeed * delta * MathConst.Deg2Rad, vec3.UnitY);
         }
     }
-    class RotatingSprite : Sprite
+    class RotatingSprite : SpriteRenderer
     {
         private float _rotationSpeed = 90;
 

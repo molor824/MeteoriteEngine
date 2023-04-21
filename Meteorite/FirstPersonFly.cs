@@ -15,15 +15,11 @@ public class FirstPersonFly : LocalVelocity
 
     public override void Start()
     {
-        base.Start();
-
         Input.CursorMode = CursorModeValue.CursorDisabled;
     }
 
     public override void InputHandler(InputEvent ievent)
     {
-        base.InputHandler(ievent);
-
         if (ievent is MouseMotionEvent motion)
         {
             var delta = motion.Delta;
@@ -44,8 +40,6 @@ public class FirstPersonFly : LocalVelocity
 
     public override void Update(float delta)
     {
-        base.Update(delta);
-
         Rotation = quat.FromAxisAngle(_yrot * MathConst.Deg2Rad, vec3.UnitY) *
                    quat.FromAxisAngle(_xrot * MathConst.Deg2Rad, vec3.UnitX);
 
@@ -64,5 +58,7 @@ public class FirstPersonFly : LocalVelocity
         var acceleration = direction == new vec3() ? Deacceleration : Acceleration;
 
         Linear = Linear.MoveTowards(direction * crntSpeed, acceleration * delta);
+        
+        base.Update(delta);
     }
 }

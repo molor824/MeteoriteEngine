@@ -6,6 +6,17 @@ public class Mesh
 {
     int _vao, _vertexBuffer, _colorBuffer, _texBuffer, _ebo, _indexCount;
 
+    public int VAO => _vao;
+    public int VertexBuffer => _vertexBuffer;
+    public int ColorBuffer => _colorBuffer;
+    public int TextureBuffer => _texBuffer;
+    public int EBO => _ebo;
+    public int IndexCount => _indexCount;
+
+    public Mesh(vec3[] vertices, ushort[] indices)
+    {
+        Upload(vertices, indices, null, null);
+    }
     public Mesh(vec3[] vertices, ushort[] indices, vec2[]? texCoords = null, Color[]? vertexColors = null)
 	{
         Upload(vertices, indices, texCoords, vertexColors);

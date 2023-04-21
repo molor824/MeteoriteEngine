@@ -7,8 +7,6 @@ public class LocalVelocity : Transform
 
     public override void Update(float delta)
     {
-        base.Update(delta);
-
         Position += Linear * delta;
         Rotation *= Angular * delta;
     }

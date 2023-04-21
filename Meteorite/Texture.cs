@@ -11,6 +11,13 @@ using System;
 
 public class Texture
 {
+    public static Texture Default = new(
+        new[] { Color.White }, 1, 1, new()
+        {
+            MagFilter = TextureMagFilter.Nearest,
+            MinFilter = TextureMinFilter.Nearest
+        }
+    );
     public vec2 Size => new(_width, _height);
     public int Width => _width;
     public int Height => _height;
@@ -22,6 +29,17 @@ public class Texture
     public Texture(string path, TextureParameters? tParams = null)
     {
         var image = Image.Load<RgbaVector>(ResourceLoader.LoadFile(path));
+
+        Upload(image, tParams ?? new());
+    }
+    public Texture(Color defaultPixel, int width, int height, TextureParameters? tParams = null)
+    {
+        var image = Image.LoadPixelData(Enumerable.Repeat(new RgbaVector(
+            defaultPixel.R,
+            defaultPixel.G,
+            defaultPixel.B,
+            defaultPixel.A
+        ), width * height).ToArray(), width, height);
 
         Upload(image, tParams ?? new());
     }

@@ -103,6 +103,7 @@ public class Node
 	/// Otherwise it uses same rate as <c>Update()</c>.
 	/// </summary>
 	public virtual void Render(float delta) { }
+	public virtual void UIRender(float delta) { }
 	/// <summary>
 	/// Called when program is about to close.
 	/// </summary>

@@ -36,7 +36,7 @@ static class Program
     }
 }
 
-public class RotatingSprite : Sprite
+public class RotatingSprite : SpriteRenderer
 {
     public float RotateSpeed;
 

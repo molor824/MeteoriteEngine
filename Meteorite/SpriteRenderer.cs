@@ -2,24 +2,26 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Meteorite;
 
-public class MeshRenderer : Transform
+/// <summary>
+/// 2D sprite with texture and color.
+/// Position Z index acts as depth.
+/// Sprite acts as quad mesh and renders just as same as 3D.
+/// </summary>
+public class SpriteRenderer : Transform2D
 {
-    public Mesh? Mesh;
     public Texture? Texture;
     public Color Tint = Color.White;
-    public RenderOptions RenderOptions;
-    
-    public MeshRenderer() { }
-    public MeshRenderer(Mesh mesh)
+    public RenderOptions RenderOptions = new()
     {
-        Mesh = mesh;
-    }
+        CullFace = false
+    };
 
     public override void Render(float delta)
     {
-        if (Mesh == null) return;
-
         var texture = Texture ?? Texture.Default;
+        var oldScale = Scale;
+
+        Scale *= texture.Size / texture.PixelsPerUnit;
 
         var projection = Game.MainCamera.ProjectionMatrix;
         var camTransform = Game.MainCamera.GlobalTransformMatrix;
@@ -27,13 +29,16 @@ public class MeshRenderer : Transform
 
         var transform = projection * camTransform.Inverse * globalTransform;
 
+
         Shader.Default.SetVec4(DefaultShader.TintLocation, Tint);
         Shader.Default.SetMat4(DefaultShader.TransformLocation, false, transform);
         Shader.Default.Use();
-        
+
         texture.Bind();
         
         RenderOptions.SetRenderOptions();
-        Mesh.Render();
+        PrimitiveMesh.Quad.Render();
+
+        Scale = oldScale;
     }
 }

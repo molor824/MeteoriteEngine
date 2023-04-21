@@ -3,8 +3,8 @@ using OpenTK.Graphics.OpenGL;
 
 public class TexturedSprites : Transform2D
 {
-    Sprite _sprite = null!;
-    Sprite _sprite1 = null!;
+    SpriteRenderer _sprite = null!;
+    SpriteRenderer _sprite1 = null!;
 
     float _rotationSpeed = 45;
     float _rotationSpeed1 = -30;

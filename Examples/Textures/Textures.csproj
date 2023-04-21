@@ -2,9 +2,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Meteorite\Meteorite.csproj" />
-    <Content Include="Resources/**">
+    <!--Uncomment the code below if you want to copy the Resources folder onto the build-->
+    <!-- <Content Include="Resources/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Content> -->
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 
 namespace Meteorite;
 
@@ -36,27 +37,36 @@ in vec2 fTexCoord;
 in vec4 fColor;
 
 uniform sampler2D texture0;
-uniform vec4 textureColor;
+uniform vec4 tint;
 
 void main()
 {
-    FragColor = texture(texture0, fTexCoord) * fColor * textureColor;
+    FragColor = texture(texture0, fTexCoord) * fColor * tint;
 }
 ";
-    public static Shader Default = new(DefaultVertexShader, DefaultFragmentShader);
+    internal static Shader Default = new(DefaultVertexShader, DefaultFragmentShader);
 
     internal int Program;
 
-    public void UseProgram()
+    internal void SetVec4(int location, vec4 value)
     {
-        GL.UseProgram(Program);
+	    GL.Uniform4(location, value.x, value.y, value.z, value.w);
     }
-    public void SetMat4(string location, bool transpose, mat4 value)
+    internal void SetVec4(int location, Color value)
+    {
+	    GL.Uniform4(location, value.R, value.G, value.B, value.A);
+    }
+    internal void SetMat4(int location, bool transpose, mat4 value)
     {
 	    unsafe
 	    {
-		    GL.UniformMatrix4(GetUniformLocation(location), 1, transpose, (float*)&value);
+		    GL.UniformMatrix4(location, 1, transpose, (float*)&value);
 	    }
+    }
+
+    internal void Use()
+    {
+	    GL.UseProgram(Program);
     }
     internal int GetUniformLocation(string location)
     {

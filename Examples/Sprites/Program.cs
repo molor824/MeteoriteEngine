@@ -6,24 +6,24 @@ static class Program
     {
         Game.New("Sprites");
 
-        var sprite = new Sprite()
+        var sprite = new SpriteRenderer()
         {
-            Color = Color.White,
+            Tint = Color.White,
             Scale = new(1, 2),
             GlobalRotation = 45,
         };
-        var sprite1 = new Sprite()
+        var sprite1 = new SpriteRenderer()
         {
             Parent = sprite,
             Position = new(1.5f, 0),
-            Color = Color.Red,
+            Tint = Color.Red,
             Layer = -1,
         };
-        var sprite2 = new Sprite()
+        var sprite2 = new SpriteRenderer()
         {
             Parent = sprite,
             LossyScale = new(1, 1),
-            Color = Color.Green,
+            Tint = Color.Green,
             Layer = 1,
             Position = new(-1, 1),
             Rotation = 20,
