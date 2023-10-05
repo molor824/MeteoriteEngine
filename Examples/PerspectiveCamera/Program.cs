@@ -1,32 +1,32 @@
 ﻿using Meteorite;
+using Meteorite.Mathematics;
 using OpenTK.Graphics.OpenGL;
-using GlmSharp;
 
 static class Program
 {
-    class RotatingCamera : Transform
+    class RotatingCamera : Transform3D
     {
-        private float _rotationSpeed = 30;
+        private float _rotationSpeed = 60;
         
         public override void Start()
         {
             base.Start();
             
             // Camera setup
-            var cam = Game.MainCamera;
+            var cam = Game.MainCamera3D;
 
             cam.Parent = this;
             cam.Projection = CameraProjection.Perspective;
             cam.Near = 0.01f;
             cam.Far = 100;
-            cam.Position = new(0, 0, 5);
+            cam.Position = new(0, 0, 4);
         }
 
         public override void Update(float delta)
         {
             base.Update(delta);
             
-            Rotation *= quat.FromAxisAngle(_rotationSpeed * delta * MathConst.Deg2Rad, vec3.UnitY);
+            Rotation *= Quat.FromAxisAngle(Vec3.UnitY, _rotationSpeed * delta * Mathf.DegToRad);
         }
     }
     class RotatingSprite : SpriteRenderer
@@ -53,7 +53,7 @@ static class Program
         {
             base.Update(delta);
 
-            Rotation += _rotationSpeed * delta;
+            ApplyGlobalRotation(Quat.FromRotationZ(_rotationSpeed * delta * Mathf.DegToRad));
         }
     }
     static void Main()

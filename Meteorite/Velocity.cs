@@ -1,13 +1,15 @@
+using Meteorite.Mathematics;
+
 namespace Meteorite;
 
-public class LocalVelocity : Transform
+public class LocalVelocity : Transform3D
 {
-    public vec3 Linear;
-    public quat Angular;
+    public Vec3 Linear;
+    public Vec3 Angular;
 
     public override void Update(float delta)
     {
-        Position += Linear * delta;
-        Rotation *= Angular * delta;
+        ApplyTranslation(Linear * delta);
+        ApplyRotation(Quat.FromEulerAngles(Angular * (delta * Mathf.DegToRad)));
     }
 }

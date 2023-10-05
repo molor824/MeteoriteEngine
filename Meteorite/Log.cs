@@ -30,7 +30,7 @@ public static class Log
 	{
 #if DEBUG
 		Console.ForegroundColor = ConsoleColor.Green;
-		Console.WriteLine(_Print("ERROR: ", fmt, objs));
+		Console.WriteLine(_Print("SUCCESS: ", fmt, objs));
 		Console.ResetColor();
 #endif
 	}

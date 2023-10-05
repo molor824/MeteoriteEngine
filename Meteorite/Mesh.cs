@@ -1,4 +1,6 @@
-﻿namespace Meteorite;
+﻿using Meteorite.Mathematics;
+
+namespace Meteorite;
 
 using OpenTK.Graphics.OpenGL;
 
@@ -13,15 +15,15 @@ public class Mesh
     public int EBO => _ebo;
     public int IndexCount => _indexCount;
 
-    public Mesh(vec3[] vertices, ushort[] indices)
+    public Mesh(Vec3[] vertices, ushort[] indices)
     {
         Upload(vertices, indices, null, null);
     }
-    public Mesh(vec3[] vertices, ushort[] indices, vec2[]? texCoords = null, Color[]? vertexColors = null)
+    public Mesh(Vec3[] vertices, ushort[] indices, Vec2[]? texCoords = null, Color[]? vertexColors = null)
 	{
         Upload(vertices, indices, texCoords, vertexColors);
     }
-    public Mesh(vec3[] vertices, ushort[] indices, Color[]? vertexColors = null, vec2[]? texCoords = null)
+    public Mesh(Vec3[] vertices, ushort[] indices, Color[]? vertexColors = null, Vec2[]? texCoords = null)
 	{
         Upload(vertices, indices, texCoords, vertexColors);
     }
@@ -31,7 +33,7 @@ public class Mesh
 		GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedShort, 0);
 	}
-    void Upload(vec3[] vertices, ushort[] indices, vec2[]? texCoords, Color[]? vertexColors)
+    void Upload(Vec3[] vertices, ushort[] indices, Vec2[]? texCoords, Color[]? vertexColors)
     {
         _indexCount = indices.Length;
 
@@ -56,7 +58,7 @@ public class Mesh
 			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
 			GL.BufferData(
 				BufferTarget.ArrayBuffer,
-                sizeof(vec3) * vertices.Length,
+                sizeof(Vec3) * vertices.Length,
                 vertices,
 				BufferUsageHint.StaticDraw
 			);
@@ -73,7 +75,7 @@ public class Mesh
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _texBuffer);
                 GL.BufferData(
                     BufferTarget.ArrayBuffer,
-                    sizeof(vec2) * texCoords.Length,
+                    sizeof(Vec2) * texCoords.Length,
                     texCoords,
                     BufferUsageHint.StaticDraw
                 );
@@ -106,10 +108,6 @@ public class Mesh
 	}
 	void Unload()
 	{
-		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-		GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-		GL.BindVertexArray(0);
-
         if (_colorBuffer != 0) GL.DeleteBuffer(_colorBuffer);
 		GL.DeleteBuffer(_vertexBuffer);
 		GL.DeleteBuffer(_ebo);

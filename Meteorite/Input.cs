@@ -1,3 +1,5 @@
+using Meteorite.Mathematics;
+
 namespace Meteorite;
 
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -6,7 +8,7 @@ public class Input : ISingleton
 {
     static unsafe GLFWCallbacks.CursorPosCallback _cursorCallback = (_, x, y) =>
     {
-        var position = new vec2((float)x, (float)y);
+        var position = new Vec2((float)x, (float)y);
 
         CallInputHandler(Node.MainRoot, new MouseMotionEvent()
         {
@@ -24,7 +26,7 @@ public class Input : ISingleton
             State = action
         });
     };
-    static vec2 _lastMousePos;
+    static Vec2 _lastMousePos;
     static Input()
     {
         Game.AddSingleton<Input>();
@@ -43,7 +45,7 @@ public class Input : ISingleton
         root.InputHandler(ievent);
         for (var i = 0; i < root.ChildrenCount; i++) CallInputHandler(root.GetChild(i), ievent);
     }
-    public static vec2 MousePosition
+    public static Vec2 MousePosition
     {
         get
         {
@@ -53,7 +55,7 @@ public class Input : ISingleton
                 return new((float)x, (float)y);
             }
         }
-        set { unsafe { GLFW.SetCursorPos(Game.RawWindow, value.x, value.y); } }
+        set { unsafe { GLFW.SetCursorPos(Game.RawWindow, value.X, value.Y); } }
     }
     public static CursorModeValue CursorMode
     {

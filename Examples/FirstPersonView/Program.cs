@@ -1,4 +1,5 @@
 ﻿using Meteorite;
+using Meteorite.Mathematics;
 using OpenTK.Graphics.OpenGL;
 
 static class Program
@@ -7,7 +8,7 @@ static class Program
     {
         Game.New("First Person Flying");
 
-        var cam = Game.MainCamera;
+        var cam = Game.MainCamera3D;
         cam.Projection = CameraProjection.Perspective;
         cam.Far = 1000;
         cam.Near = 0.01f;
@@ -44,6 +45,6 @@ public class RotatingSprite : SpriteRenderer
     {
         base.Update(delta);
         
-        RotateZ(RotateSpeed * delta);
+        ApplyGlobalRotation(RotateSpeed * delta * Mathf.DegToRad);
     }
 }

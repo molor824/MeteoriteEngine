@@ -1,14 +1,15 @@
-using OpenTK.Graphics.OpenGL;
-
 namespace Meteorite;
 
-public class MeshRenderer : Transform
+public class MeshRenderer : Transform3D
 {
     public Mesh? Mesh;
     public Texture? Texture;
     public Color Tint = Color.White;
     public RenderOptions RenderOptions;
-    
+
+    internal static int TransformLocation = DefaultShaders.Shader3D.GetUniformLocation("transform");
+    internal static int TintLocation = DefaultShaders.Shader3D.GetUniformLocation("tint");
+
     public MeshRenderer() { }
     public MeshRenderer(Mesh mesh)
     {
@@ -21,15 +22,15 @@ public class MeshRenderer : Transform
 
         var texture = Texture ?? Texture.Default;
 
-        var projection = Game.MainCamera.ProjectionMatrix;
-        var camTransform = Game.MainCamera.GlobalTransformMatrix;
-        var globalTransform = GlobalTransformMatrix;
+        var projection = Game.MainCamera3D.ProjectionMatrix;
+        var camTransform = Game.MainCamera3D.GlobalTransform;
+        var globalTransform = GlobalTransform;
 
-        var transform = projection * camTransform.Inverse * globalTransform;
+        var transform = projection * camTransform.Inverse() * globalTransform;
 
-        Shader.Default.SetVec4(DefaultShader.TintLocation, Tint);
-        Shader.Default.SetMat4(DefaultShader.TransformLocation, false, transform);
-        Shader.Default.Use();
+        DefaultShaders.Shader3D.SetVec4(TransformLocation, Tint);
+        DefaultShaders.Shader3D.SetMat4(TintLocation, true, transform);
+        DefaultShaders.Shader3D.Use();
         
         texture.Bind();
         

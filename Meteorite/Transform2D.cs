@@ -1,73 +1,105 @@
-using System.Windows.Markup;
+using Meteorite.Mathematics;
 
 namespace Meteorite;
 
-public class Transform2D : Transform
+public class Transform2D : Transform3D
 {
-    public Transform Transform3D => this;
-    public new vec2 Position
-    {
-        get => base.Position.xy;
-        set => base.Position.xy = value;
-    }
-    public new vec2 Scale
-    {
-        get => base.Scale.xy;
-        set => base.Scale.xy = value;
-    }
-    public new float Rotation
-    {
-        get => (float)base.Rotation.EulerAngles.z * MathConst.Rad2Deg;
-        set
-        {
-            var euler = base.Rotation.EulerAngles;
-            euler.z = value * MathConst.Deg2Rad;
-            base.Rotation = new quat((vec3)euler);
-        }
-    }
-    public float LocalLayer
-    {
-        get => base.Position.z;
-        set => base.Position.z = value;
-    }
-    public new vec2 GlobalPosition
-    {
-        get => base.GlobalPosition.xy;
-        set
-        {
-            var pos = base.GlobalPosition;
-            pos.xy = value;
-            base.GlobalPosition = pos;
-        }
-    }
-    public new vec2 LossyScale
-    {
-        get => base.LossyScale.xy;
-        set
-        {
-            var scale = base.LossyScale;
-            scale.xy = value;
-            base.LossyScale = scale;
-        }
-    }
-    public new float GlobalRotation
-    {
-        get => (float)base.GlobalRotation.EulerAngles.z * MathConst.Rad2Deg;
-        set
-        {
-            var euler = base.GlobalRotation.EulerAngles;
-            euler.z = value * MathConst.Deg2Rad;
-            base.GlobalRotation = new quat((vec3)euler);
-        }
-    }
     public float Layer
     {
-        get => base.GlobalPosition.z;
+        get => Transform.M34;
+        set => Transform.M34 = value;
+    }
+
+    public float GlobalLayer
+    {
+        get => GlobalTransform.M34;
         set
         {
-            var pos = base.GlobalPosition;
-            pos.z = value;
-            base.GlobalPosition = pos;
+            var t = GlobalTransform;
+            t.M34 = value;
+            GlobalTransform = t;
         }
+    }
+
+    public new Vec2 Position
+    {
+        get => (Vec2)base.Position;
+        set => base.Position = new(value, base.Position.Z);
+    }
+
+    public new float Rotation
+    {
+        get => Transform.GetEulerAngles().Z;
+        set
+        {
+            var euler = Transform.GetEulerAngles();
+            base.Rotation = Quat.FromEulerAngles(new(euler.X, euler.Y, value));
+        }
+    }
+
+    public new Vec2 Scale
+    {
+        get => (Vec2)base.Scale;
+        set => base.Scale = new(value, base.Scale.Z);
+    }
+
+    public void ApplyTranslation(Vec2 translation)
+    {
+        base.ApplyTranslation(new(translation, 0));
+    }
+
+    public void ApplyRotation(float rotation)
+    {
+        base.ApplyRotation(Quat.FromRotationZ(rotation));
+    }
+
+    public void ApplyScale(Vec2 scale)
+    {
+        base.ApplyScale(new(scale, 1));
+    }
+
+    public new Vec2 GlobalPosition
+    {
+        get => (Vec2)base.GlobalPosition;
+        set
+        {
+            var position = base.GlobalPosition;
+            base.GlobalPosition = new(value, position.Z);
+        }
+    }
+
+    public new Vec2 GlobalScale
+    {
+        get => (Vec2)base.GlobalScale;
+        set
+        {
+            var scale = base.GlobalScale;
+            base.GlobalScale = new(value, scale.Z);
+        }
+    }
+
+    public new float GlobalRotation
+    {
+        get => GlobalTransform.GetEulerAngles().Z;
+        set
+        {
+            var t = GlobalTransform;
+            GlobalTransform = Mat4x4.FromTransformation(t.Translation, Quat.FromRotationZ(value), t.GetScale());
+        }
+    }
+
+    public void ApplyGlobalTranslation(Vec2 translation)
+    {
+        base.ApplyGlobalTranslation(new(translation, 0));
+    }
+
+    public void ApplyGlobalRotation(float rotation)
+    {
+        base.ApplyGlobalRotation(Quat.FromRotationZ(rotation));
+    }
+
+    public void ApplyGlobalScale(Vec2 scale)
+    {
+        base.ApplyGlobalScale(new(scale, 1));
     }
 }

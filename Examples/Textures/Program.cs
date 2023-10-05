@@ -1,4 +1,5 @@
 ﻿using Meteorite;
+using Meteorite.Mathematics;
 using OpenTK.Graphics.OpenGL;
 
 public class TexturedSprites : Transform2D
@@ -7,7 +8,7 @@ public class TexturedSprites : Transform2D
     SpriteRenderer _sprite1 = null!;
 
     float _rotationSpeed = 45;
-    float _rotationSpeed1 = -30;
+    float _rotationSpeed1 = 30;
 
     public override void Added()
     {
@@ -36,16 +37,14 @@ public class TexturedSprites : Transform2D
         _sprite.Texture.PixelsPerUnit = 100;
         _sprite1.Texture.PixelsPerUnit = 50;
 
-        // layer is z index in 3D rendering
-        _sprite.Layer = -1;
-        _sprite1.Layer = 0;
+        _sprite.GlobalLayer = -1;
     }
     public override void Update(float delta)
     {
         base.Update(delta);
         
-        _sprite.Rotation += _rotationSpeed * delta;
-        _sprite1.Rotation += _rotationSpeed1 * delta;
+        _sprite.ApplyGlobalRotation(_rotationSpeed * delta * Mathf.DegToRad);
+        _sprite1.ApplyRotation(_rotationSpeed1 * delta * Mathf.DegToRad);
     }
 }
 static class Program
@@ -53,7 +52,7 @@ static class Program
     static void Main()
     {
         Game.New("Test");
-
+        
         Game.AddNode(new TexturedSprites());
         Game.Run();
     }

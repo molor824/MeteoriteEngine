@@ -1,6 +1,7 @@
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
+using Meteorite.Mathematics;
 
 namespace Meteorite;
 
@@ -18,10 +19,12 @@ public static class Game
     }
 
     public static float FixedUpdateDelta = 1f / 60;
-    public static Camera MainCamera = new();
+    public static Camera3D MainCamera3D = new();
+    public static Camera2D MainCamera2D = new();
+    
     public static int Width => _width;
     public static int Height => _height;
-    public static vec2 WindowSize => new(_width, _height);
+    public static Vec2 WindowSize => new(_width, _height);
     public static event Action<int, int>? ResizeEvent;
 
     public static bool WindowShouldClose
@@ -207,8 +210,9 @@ public static class Game
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.Clear(ClearBufferMask.DepthBufferBit);
 
+            MainCamera3D.Render(0);
+            MainCamera2D.Render(0);
             foreach (var singleton in _singletons) singleton.Render(elapsed);
-            MainCamera.Render(0);
             Render(Node.MainRoot, elapsed);
             
             UIRender(Node.MainRoot, elapsed);

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Meteorite.Mathematics;
 
 namespace Meteorite;
 
@@ -18,7 +19,7 @@ public class Texture
             MinFilter = TextureMinFilter.Nearest
         }
     );
-    public vec2 Size => new(_width, _height);
+    public Vec2 Size => new(_width, _height);
     public int Width => _width;
     public int Height => _height;
     public float PixelsPerUnit = 1;

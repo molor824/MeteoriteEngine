@@ -1,4 +1,5 @@
-﻿using OpenTK.Windowing.GraphicsLibraryFramework;
+﻿using Meteorite.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Meteorite;
 
@@ -6,8 +7,8 @@ public abstract class InputEvent{}
 
 public class MouseMotionEvent : InputEvent
 {
-    public vec2 Position;
-    public vec2 Delta;
+    public Vec2 Position;
+    public Vec2 Delta;
 }
 
 public class KeyEvent : InputEvent

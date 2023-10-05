@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
+﻿using Meteorite.Mathematics;
 
 namespace Meteorite;
 
@@ -8,55 +7,17 @@ using OpenTK.Mathematics;
 
 public class Shader
 {
-    const string DefaultVertexShader =
-@"#version 330
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTexCoord;
-layout (location = 2) in vec4 aColor;
-
-out vec4 fColor;
-out vec2 fTexCoord;
-
-uniform mat4 transform;
-
-void main()
-{
-    vec4 position = transform * vec4(aPos, 1);
-	gl_Position = position;
-    fTexCoord = aTexCoord;
-    fColor = aColor;
-}
-";
-    const string DefaultFragmentShader =
-@"#version 330
-
-out vec4 FragColor;
-
-in vec2 fTexCoord;
-in vec4 fColor;
-
-uniform sampler2D texture0;
-uniform vec4 tint;
-
-void main()
-{
-    FragColor = texture(texture0, fTexCoord) * fColor * tint;
-}
-";
-    internal static Shader Default = new(DefaultVertexShader, DefaultFragmentShader);
-
     internal int Program;
 
-    internal void SetVec4(int location, vec4 value)
+    internal void SetVec4(int location, Vector4 value)
     {
-	    GL.Uniform4(location, value.x, value.y, value.z, value.w);
+	    GL.Uniform4(location, value.X, value.Y, value.Z, value.W);
     }
     internal void SetVec4(int location, Color value)
     {
 	    GL.Uniform4(location, value.R, value.G, value.B, value.A);
     }
-    internal void SetMat4(int location, bool transpose, mat4 value)
+    internal void SetMat4(int location, bool transpose, Mat4x4 value)
     {
 	    unsafe
 	    {
@@ -141,8 +102,9 @@ void main()
 	}
 
     public Shader(string vertexShader, string fragmentShader)
-	{
-        Upload(vertexShader, fragmentShader);
+    {
+	    var version = $"#version {GL.GetInteger(GetPName.MajorVersion)}{GL.GetInteger(GetPName.MinorVersion)}0\n";
+        Upload(version + vertexShader, version + fragmentShader);
 	}
 
     ~Shader()

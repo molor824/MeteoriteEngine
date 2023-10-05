@@ -1,4 +1,6 @@
-﻿namespace Meteorite;
+﻿using Meteorite.Mathematics;
+
+namespace Meteorite;
 
 public struct Color
 {
@@ -30,27 +32,27 @@ public struct Color
         A = a;
     }
 
-    public Color(vec2 rg, float b, float a = 1)
+    public Color(Vec2 rg, float b, float a = 1)
     {
-        R = rg.x;
-        G = rg.y;
+        R = rg.X;
+        G = rg.Y;
         B = b;
         A = a;
     }
 
-    public Color(vec3 rgb, float a = 1)
+    public Color(Vec3 rgb, float a = 1)
     {
-        R = rgb.x;
-        G = rgb.y;
-        B = rgb.z;
+        R = rgb.X;
+        G = rgb.Y;
+        B = rgb.Z;
         A = a;
     }
 
-    public Color(vec4 rgba)
+    public Color(Vec4 rgba)
     {
-        R = rgba.x;
-        G = rgba.y;
-        B = rgba.z;
-        A = rgba.w;
+        R = rgba.X;
+        G = rgba.Y;
+        B = rgba.Z;
+        A = rgba.W;
     }
 }
