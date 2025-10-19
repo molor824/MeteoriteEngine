@@ -1,9 +1,32 @@
-﻿namespace Meteorite;
+namespace Meteorite;
 
-public interface ISingleton
+public class Singleton : IDisposable
 {
-    public virtual void Start() {}
-    public virtual void Update(float delta) {}
-    public virtual void Render(float delta) {}
-    public virtual void Close() {}
+    private bool _disposed;
+
+    public void Test()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(GetType().Name);
+    }
+    public T Test<T>(T value)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(GetType().Name);
+        return value;
+    }
+
+    protected virtual void OnDispose() { }
+    public void Dispose()
+    {
+        if (_disposed) return;
+        
+        OnDispose();
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+    ~Singleton()
+    {
+        Dispose();
+    }
 }
