@@ -9,6 +9,7 @@ public class App
     private IWindow _window;
     private double _fixedTimeLeft = 0.0;
     private GL _gl;
+    private Dictionary<Type, Singleton> _singletons = [];
 
     public GL Gl => _gl;
     public double FixedDelta = 1.0 / 120.0;
